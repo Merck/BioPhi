@@ -1,0 +1,105 @@
+<div class="mb-2">
+  <label class="form-label">Humanization method</label>
+  <div class="btn-group ms-1">
+    <input type="radio" class="btn-check" data-radio-tab="#method_args1"
+           value="sapiens" name="method" id="method_input1"
+           {% if humanization_method == 'sapiens' %}checked{% endif %}>
+    <label class="btn btn-sm btn-outline-primary" for="method_input1">Sapiens</label>
+
+    <input type="radio" class="btn-check" data-radio-tab="#method_args2"
+           value="cdr_grafting" name="method" id="method_input2"
+           {% if humanization_method == 'cdr_grafting' %}checked{% endif %}>
+    <label class="btn btn-sm btn-outline-primary" for="method_input2">CDR Grafting</label>
+  </div>
+</div>
+
+<div class="tab-content mb-3" id="method_args_box">
+  <div id="method_args1" class="tab-pane active" role="tabpanel">
+    <p style="max-width: 800px">Sapiens is a high-throughput humanization method based on deep learning on antibody repertoires
+      of more&nbsp;than 500 human subjects from the <a href="http://opig.stats.ox.ac.uk/webapps/oas/" target="_blank">Observed Antibody Space</a> database.</p>
+
+    <a class="text-secondary text-decoration-none" data-bs-toggle="collapse" href="#" data-bs-target=".advanced-settings" role="button">
+      Advanced settings {{ icon('sliders') }}
+    </a>
+
+    <div class="collapse advanced-settings">
+      <div class="mt-1 mb-1">
+        <label for="iterations" class="form-label">Humanization iterations</label>
+        <input type="number" size="3" style="width: 4.5em; display: inline-block;"
+               value="{{ sapiens_humanization_params.iterations }}"
+               min="1" max="5" class="ms-2 form-control form-control-sm" id="iterations" name="iterations">
+        <div class="ms-4 form-check d-inline-block">
+          <input class="form-check-input" type="checkbox" value="yes" name="humanize_cdrs"
+                 id="humanize_cdrs"
+                 {% if sapiens_humanization_params.humanize_cdrs %}checked{% endif %}>
+          <label class="form-check-label" for="humanize_cdrs">
+            Ignore CDR mutations
+          </label>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div id="method_args2" class="tab-pane" role="tabpanel">
+    <p>Graft the CDR regions into the nearest human V and J gene sequences based on % sequence identity.</p>
+
+    <a class="text-secondary text-decoration-none" data-bs-toggle="collapse" href="#" data-bs-target=".advanced-settings" role="button">
+      Advanced settings {{ icon('sliders') }}
+    </a>
+
+    <div class="collapse advanced-settings">
+      <div class="row g-3 mb-2 align-items-center">
+        <div class="col-auto">
+          <label class="col-form-label">Heavy germline</label>
+        </div>
+        <div class="col-auto">
+          <select name="heavy_v_germline" class="form-select form-select-sm d-inline-block">
+            <option value="auto">Auto</option>
+            {% for name in heavy_germlines %}
+              <option value="{{ name }}" {% if cdr_grafting_humanization_params.heavy_v_germline == name %}selected{% endif %}>
+                {{ name }}
+              </option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="col-auto">
+          <label class="col-form-label">Light germline</label>
+        </div>
+        <div class="col-auto">
+          <select name="light_v_germline" class="form-select form-select-sm d-inline-block">
+            <option value="auto">Auto</option>
+            {% for name in light_germlines %}
+              <option value="{{ name }}" {% if cdr_grafting_humanization_params.light_v_germline == name %}selected{% endif %}>
+                {{ name }}
+              </option>
+            {% endfor %}
+          </select>
+        </div>
+      </div>
+      <div class="mb-2">
+        <label class="form-label">
+          Back-mutations:
+        </label>
+        <div class="form-check ms-2 d-inline-block">
+          <input class="form-check-input" type="checkbox" value="yes" name="cdr_grafting_backmutate_vernier"
+                 id="cdr_grafting_backmutate_vernier" {% if cdr_grafting_humanization_params.backmutate_vernier %}checked{% endif %}>
+          <label class="form-check-label" for="cdr_grafting_backmutate_vernier">
+            Back-mutate Vernier zone residues (Kabat only)
+          </label>
+        </div>
+      </div>
+      <div class="mb-2">
+        <label class="form-label">
+          Sapiens:
+        </label>
+        <div class="form-check ms-2 d-inline-block">
+          <input class="form-check-input" type="checkbox" value="yes" name="sapiens_final_pass"
+                 id="sapiens_final_pass" {% if cdr_grafting_humanization_params.sapiens_iterations %}checked{% endif %}>
+          <label class="form-check-label" for="sapiens_final_pass">
+            Perform final humanization pass using Sapiens
+          </label>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+

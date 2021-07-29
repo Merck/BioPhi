@@ -1,0 +1,19 @@
+---
+dependencies:
+  - python = 3.8
+  - pip
+  - abnumber == 0.2.7
+  - pip:
+    - click >= 7
+    - pandas
+    - sqlalchemy
+    - flask
+    - redis
+    - celery
+    - biopython
+    - pytest
+    - requests
+    - tqdm
+    - xlsxwriter
+    - flask-humanize
+    - fairseq == 0.10.2

@@ -1,0 +1,125 @@
+{% extends "humanization/humanness_layout.html" %}
+{% set title = "Humanness Report" %}
+
+{% set SORTABLE = 'sortable' if not has_next_page and not has_prev_page %}
+
+{% block main %}
+
+<div class="row mt-3 mb-3">
+  <div class="col-4">
+    <a class="btn btn-light" href="{{ url_for('biophi_humanization.humanness_get') }}">
+      {{ icon('chevron-left') }} Input
+    </a>
+  </div>
+  <div class="col-8 text-end">
+    <div class="d-inline-block">
+      <a class="btn btn-light" href="{{ url_for('biophi_humanization.humanize_get', humanness_task_id=task_id) }}">
+        {{ icon('arrow-right-short') }} Humanize
+      </a>
+    </div>
+    <div class="d-inline-block dropdown">
+      <a class="btn btn-primary dropdown-toggle" role="button" id="exportDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+        Export
+      </a>
+      <ul class="dropdown-menu" aria-labelledby="exportDropdown">
+        <li>
+          <a class="dropdown-item" target="_blank"
+               href="{{ url_for('biophi_humanization.humanness_export_oasis_table', task_id=task_id) }}">Summary table</a>
+        </li>
+        <li>
+          <a class="dropdown-item" target="_blank"
+               href="{{ url_for('biophi_humanization.humanness_export_oasis_table', task_id=task_id, full=1) }}">Full table</a>
+        </li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<h3>Humanness report results</h3>
+
+<table class="table table-humanness-summary table-hover">
+  <thead>
+    <tr>
+      <th class="border-end"></th>
+      <th class="border-end" colspan="3">Antibody</th>
+      <th class="border-end" colspan="4">Heavy chain</th>
+      <th class="border-end" colspan="4">Light chain</th>
+      <th></th>
+    </tr>
+  </thead>
+  <thead>
+    <tr>
+      <th class="{{ SORTABLE }} border-end">Name</th>
+      <th class="{{ SORTABLE }}">OASis<br>Percentile</th>
+      <th class="{{ SORTABLE }}">OASis<br>Identity</th>
+      <th class="{{ SORTABLE }} border-end">Germline<br>Content</th>
+      <th class="{{ SORTABLE }}">OASis<br>Percentile</th>
+      <th class="{{ SORTABLE }}">OASis<br>Identity</th>
+      <th class="{{ SORTABLE }}">Germline<br>Gene</th>
+      <th class="{{ SORTABLE }} border-end">Germline<br>Content</th>
+      <th class="{{ SORTABLE }}">OASis<br>Percentile</th>
+      <th class="{{ SORTABLE }}">OASis<br>Identity</th>
+      <th class="{{ SORTABLE }}">Germline<br>Gene</th>
+      <th class="{{ SORTABLE }} border-end">Germline<br>Content</th>
+      <th>Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for result in results %}
+      <tr data-href="{{ url_for('biophi_humanization.humanness_report_detail_get', task_id=task_id, result_index=loop.index) }}">
+        <td class="border-end border-end">{{ result.input.name }}</td>
+        {% if isinstance(result, Exception) %}
+          <td class="border-end text-danger border-end" colspan="10">Failed: {{ result }}</td>
+        {% else %}
+          {% set min_subj = result.oasis_params.min_fraction_subjects %}
+          <td class="text-bold bg-spectral{{ '{:.0f}'.format(result.humanness.get_oasis_percentile(min_subj)*100) }}">{{ '{:.0%}'.format(result.humanness.get_oasis_percentile(min_subj)) }}</td>
+          <td>{{ '{:.0%}'.format(result.humanness.get_oasis_identity(min_subj)) }}</td>
+          <td class="border-end">{{ '{:.0%}'.format(result.humanness.get_germline_content()) }}</td>
+
+          {{ chain_row(result.humanness.vh, min_subj) }}
+          {{ chain_row(result.humanness.vl, min_subj) }}
+        {% endif %}
+        <td>
+          <a class="btn btn-sm btn-light" href="{{ url_for('biophi_humanization.humanness_report_detail_get', task_id=task_id, result_index=loop.index) }}">
+            Detail
+          </a>
+        </td>
+      </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+{% if has_next_page or has_prev_page %}
+<div class="text-center">
+  <div class="btn-group">
+    {% if has_prev_page %}
+      <a class="btn btn-light" href="?page={{ page-1 }}">&lt; Previous page</a>
+    {% else %}
+      <a class="btn btn-light disabled">&lt; Previous page</a>
+    {% endif %}
+    {% if has_next_page %}
+      <a class="btn btn-light" href="?page={{ page+1 }}">Next page &gt;</a>
+    {% else %}
+      <a class="btn btn-light disabled">Next page &gt;</a>
+    {% endif %}
+  </div>
+</div>
+{% endif %}
+
+{% endblock %}
+
+{% macro chain_row(chain_humanness, min_subj) %}
+{% if chain_humanness %}
+  <td class="border-spectral{{ '{:.0f}'.format(chain_humanness.get_oasis_percentile(min_subj)*100) }}">
+    {{ '{:.0%}'.format(chain_humanness.get_oasis_percentile(min_subj)) }}
+  </td>
+  <td>{{ '{:.0%}'.format(chain_humanness.get_oasis_identity(min_subj)) }}</td>
+  <td>{{ chain_humanness.v_germline_names[0] }}</td>
+  <td class="border-end">{{ '{:.0%}'.format(chain_humanness.get_germline_content()) }}</td>
+{% else %}
+  <td>-</td>
+  <td>-</td>
+  <td>-</td>
+  <td class="border-end">-</td>
+{% endif %}
+{% endmacro %}

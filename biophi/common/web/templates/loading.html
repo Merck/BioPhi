@@ -1,0 +1,37 @@
+{% extends "layout.html" %}
+{% set title = "Task in progress" %}
+
+
+{% block header %}
+  <div id="header" style="background-position: center bottom">
+    <div class="container">
+        <h1 class="display-1 fw-lighter">Processing...</h1>
+    </div>
+  </div>
+{% endblock %}
+
+
+{% block container %}
+
+<div class="container">
+    <div class="row mt-5 mb-5">
+        <div class="col-6">
+            <div class="progress">
+                {% if total and total > 1 %}
+                <div class="progress-bar bg-info" role="progressbar" style="width: {{ completed / total * 100}}%;">
+                    {{ '{:.0%}'.format(completed / total) }}
+                </div>
+                {% else %}
+                <div class="progress-bar progress-bar-striped bg-info progress-bar-animated" role="progressbar" style="width: 100%">
+                    Task in progress...
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+setTimeout(function(){location.reload()}, 2000)
+</script>
+
+{% endblock %}

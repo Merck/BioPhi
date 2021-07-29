@@ -1,0 +1,28 @@
+{% extends "layout.html" %}
+
+{% block head %}
+<link href="{{ url_for('static', filename='dashboard.css') | autoversion }}" rel="stylesheet">
+{% endblock %}
+
+
+{% block container %}
+
+<div class="container-fluid">
+    <div class="row">
+      <nav id="sidebarMenu" class="col-md-3 col-lg-2 d-md-block bg-light sidebar collapse d-print-none">
+        <div class="position-sticky pt-3">
+          {% block navbar %}
+          {% endblock %}
+
+        </div>
+      </nav>
+
+      <main id="dashboardMain" class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+          {% include 'flash.html' %}
+
+          {% block main %}
+          {% endblock %}
+      </main>
+    </div>
+  </div>
+{% endblock %}

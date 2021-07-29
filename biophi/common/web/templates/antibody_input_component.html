@@ -1,0 +1,22 @@
+<div class="mb-2">
+  <label class="form-label">Input mode</label>
+  <div class="btn-group ms-1">
+    <input type="radio" class="btn-check" data-radio-tab="#input_mode_tab_single"
+           value="single" name="input_mode" id="input_mode_single"
+           {% if input_mode == 'single' %}checked{% endif %}>
+    <label class="btn btn-sm btn-outline-primary" for="input_mode_single">Single sequence</label>
+
+    <input type="radio" class="btn-check" data-radio-tab="#input_mode_tab_bulk"
+           value="bulk" name="input_mode" id="input_mode_bulk"
+           {% if input_mode == 'bulk' %}checked{% endif %}>
+    <label class="btn btn-sm btn-outline-primary" for="input_mode_bulk">Bulk input</label>
+  </div>
+</div>
+<div class="tab-content">
+  <div class="tab-pane show active" id="input_mode_tab_single" role="tabpanel" aria-labelledby="pills-single-tab">
+    {% include 'antibody_single_input_component.html' %}
+  </div>
+  <div class="tab-pane" id="input_mode_tab_bulk" role="tabpanel" aria-labelledby="pills-bulk-tab">
+    {% include 'antibody_bulk_input_component.html' %}
+  </div>
+</div>

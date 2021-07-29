@@ -1,0 +1,139 @@
+.table-humanization>:not(caption)>*>* {
+    padding: .1rem .3rem;
+    font-size: 90%;
+}
+
+.table-humanization-summary {
+    font-size: 90%;
+    padding: .1rem 1rem;
+}
+
+.table-humanness-summary {
+    font-size: 85%;
+    padding: .1rem 1rem;
+}
+
+.table-humanization-summary .btn {
+    padding: 0 1rem;
+}
+
+.table-humanness-summary .btn {
+    padding: 0 1rem;
+    font-size: 85%;
+}
+
+.table-humanization-section td {
+    border-top: 1px solid #dee2e6;
+}
+
+/* Mutation arrow between mutated residues in humanization table */
+.mutation-arrow {
+    position: relative;
+}
+
+.mutation-arrow:before {
+    content: '→';
+    font-weight: bold;
+    display: inline-block;
+    position: absolute;
+    left: -0.45em;
+    top: 1px;
+}
+
+/* Amino acid in center of peptide shown in larger font size */
+.peptide-center {
+    font-size: 125%;
+    display: inline-block;
+    position: relative;
+    margin-top: -5px;
+    top: 1px;
+}
+
+/* Highlight of CDR regions in humanization table */
+.table-region-cdr1, .table-region-cdr2, .table-region-cdr3 {
+    background-color: #eeeeee !important;
+}
+
+.loading-overlay {
+    display: block;
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.5);
+    position: absolute;
+    z-index: 1000;
+    top: 0;
+    left: 0;
+}
+
+.designer-pills .nav-link {
+    padding: .3rem 1rem;
+}
+.designer-pills.nav-pills .nav-link.active {
+    background: #e9e9e9;
+    color: black;
+}
+
+.designer-line a, .designer-line span {
+    position: relative;
+    display: inline-block;
+    height: 21px;
+    line-height: 20px;
+    font-size: 13.5px;
+    width: 8.4px;
+    box-sizing: content-box;
+    vertical-align: top;
+    text-align: center;
+    text-decoration: none;
+    color: #000000;
+    position: relative;
+}
+
+.designer-line:not(.designer-parental-line) a:not(:hover):not(.aa-match) {
+    background: white !important;
+}
+
+.designer-line a:hover, .designer-line.designer-result-line span:hover, .designer-line .active {
+    margin: -2px -2px;
+    font-size: 16px;
+    line-height: 24px;
+    height: 25px;
+    width: 12.4px;
+    z-index: 100;
+    text-decoration: none;
+    box-shadow: 0px 0px 5px 5px white;
+}
+
+span[data-result-pos] {
+    padding: 2px 0;
+    cursor: pointer;
+    position: relative;
+}
+
+.designer-parental-line a {
+    color: #333333;
+}
+
+.designer-parental-line .designer-mut::after {
+    content: '↓';
+    color: #888888;
+    font-size: 110%;
+    z-index: 10;
+    display: inline-block;
+    position: absolute;
+    bottom: -1.25rem;
+    left: 0px;
+}
+
+.designer-parental-line .designer-mut-important::after {
+    color: #000000;
+    font-weight: bold;
+}
+
+.designer-parental-line .designer-mut:hover::after {
+    left: 1.5px;
+    z-index: 200;
+}
+
+.designer-result-line .designer-mut {
+    font-weight: bold;
+}

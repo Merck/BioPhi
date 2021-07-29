@@ -1,0 +1,267 @@
+{% extends "humanization/designer_layout.html" %}
+{% set title = result.input.name + " - Designer" %}
+
+{% set MIN_SUBJ = result.oasis_params.min_fraction_subjects %}
+{% set MIN_SAPIENS_SCORE = 0.01 %}
+{% set MIN_FAMILY_FREQ = 0.005 %}
+{% set RARE_FAMILY_FREQ = 0.01 %}
+
+{%
+  from 'humanization/humanize_alignment_component.html'
+  import format_percent_subjects, format_aa_frequency with context
+%}
+
+{% macro format_aa_frequency_tooltip(v_germline_family, aa, freqs) %}
+{% if freqs %}
+  Frequency in {{ v_germline_family }}: {{ aa }}={{ format_aa_frequency(freqs.get(aa, 0) if freqs else none) }}
+{% else %}
+  Frequency for {{ v_germline_family }} not available
+{% endif %}
+{% endmacro %}
+
+
+{% block main %}
+
+<div class="row mt-3">
+  <div class="col-sm-6">
+    <h3>Antibody Designer <span class="text-secondary fw-light">{{ result.input.name }}</span></h3>
+  </div>
+  <div class="col-sm-6 d-print-none">
+    <div class="mb-3 text-end dropdown">
+      <a class="btn btn-primary dropdown-toggle" role="button" id="exportDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+        Export
+      </a>
+      <ul class="dropdown-menu" aria-labelledby="exportDropdown">
+        <li>
+          <a class="dropdown-item" target="_blank"
+               href="{{ url_for('biophi_humanization.humanize_detail_export_humanized_fasta', task_id=task_id, index=result_index) }}">FASTA</a>
+        </li>
+        <li>
+          <a class="dropdown-item" target="_blank"
+               href="{{ url_for('biophi_humanization.humanize_detail_export_alignment', task_id=task_id, index=result_index) }}">Alignment</a>
+        </li>
+        <li>
+          <a class="dropdown-item" target="_blank"
+               href="{{ url_for('biophi_humanization.humanize_detail_export_oasis_table', task_id=task_id, index=result_index) }}">OASis table</a>
+        </li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<div class="row mb-3 mt-2" style="max-width: 1150px;">
+  <div class="col-4">
+    <h5 class="card-title">
+      <span style="padding: .35em" class="badge fs-5 fw-light bg-spectral{{ '{:.0f}'.format(result.parental_humanness.get_oasis_percentile(MIN_SUBJ)*100) }}">
+        {{ '{:.0%}'.format(result.parental_humanness.get_oasis_percentile(MIN_SUBJ)) }}
+      </span>&nbsp;<span class="fw-light">→</span>&nbsp;<span
+            style="padding: .35em"
+            class="badge fs-5 bg-spectral{{ '{:.0f}'.format(result.humanized_humanness.get_oasis_percentile(MIN_SUBJ)*100) }}">
+        {{ '{:.0%}'.format(result.humanized_humanness.get_oasis_percentile(MIN_SUBJ)) }}
+      </span>
+      Humanness percentile
+    </h5>
+  </div>
+  <div class="col-4">
+    <h5 class="card-title">
+      <span class="badge fs-5 text-dark bg-light">
+        <span class="fw-light">{{ '{:.0%}'.format(result.parental_humanness.get_oasis_identity(MIN_SUBJ))
+        }}&nbsp;→&nbsp;</span>{{ '{:.0%}'.format(result.humanized_humanness.get_oasis_identity(MIN_SUBJ)) }}
+      </span>
+      Human identity
+    </h5>
+  </div>
+  <div class="col-4">
+    <h5 class="card-title">
+      <span class="badge fs-5 text-dark bg-light">
+          <span class="fw-light">{{ '{:.0%}'.format(result.parental_humanness.get_germline_content())
+          }}&nbsp;→&nbsp;</span>{{ '{:.0%}'.format(result.humanized_humanness.get_germline_content()) }}
+      </span>
+      Germline content
+    </h5>
+  </div>
+</div>
+
+{% if result.humanized_humanness.vh %}
+<h4>Heavy chain</h4>
+{{
+  chain_designer(result.parental_humanness.vh, result.humanized_humanness.vh, result.humanization.vh, 'vh')
+}}
+{% endif %}
+
+{% if result.humanized_humanness.vl %}
+<h4 class="mt-4">Light chain</h4>
+{{
+  chain_designer(result.parental_humanness.vl, result.humanized_humanness.vl, result.humanization.vl, 'vl')
+}}
+{% endif %}
+
+{% endblock %}
+
+{% macro chain_designer(parental_humanness, humanized_humanness, humanization, id) %}
+  <div class="mb-3 font-monospace text-nowrap fs-smaller designer-line designer-parental-line">
+    {% for pos, aa, num_non_human in parental_humanness.get_positional_humanness(MIN_SUBJ)
+    %}{% set is_vernier = pos.cdr_definition == 'kabat' and pos.is_in_vernier()
+    %}{% set peptide = parental_humanness.get_peptide(pos, edges=True)
+    %}{% set freqs = parental_humanness.germline_family_residue_frequency.get(pos)
+    %}<a href="{{ url_for_arg(pos=pos, aa=aa, relative=True) }}"
+         data-pos="{{ pos }}" class="{% if aa != humanized_humanness.chain[pos] %}designer-mut
+         {% if pos.is_in_cdr() or (pos.cdr_definition == 'kabat' and pos.is_in_vernier()) %}designer-mut-important{% endif %}{% endif %}"
+         data-bs-toggle="tooltip" data-tooltip-classes="tooltip-medium" data-bs-html="true"
+         title="{{ pos.scheme.title() }} {{ pos }} {% if pos.is_in_cdr() %}(CDR){% elif is_vernier %}(Vernier zone){% endif %}
+             <br>{{ peptide.seq }}: {{ format_percent_subjects(peptide.fraction_oas_subjects) }} subjects
+             <br>{{ format_aa_frequency_tooltip(humanized_humanness.v_germline_family, aa, freqs) }}"
+
+            style="{% if pos.is_in_cdr() %}border-bottom: 3px solid #777777; {% elif is_vernier %}border-bottom: 3px solid #cccccc;{% endif %}
+            background-color: rgb(255, {{ 255 - num_non_human**0.80 * 30 }}, {{ 255 - num_non_human**0.65 * 40 }});">{{ aa }}</a>{%
+    endfor %}
+    Parental
+  </div>
+  <div class="mb-3 font-monospace text-nowrap fs-smaller designer-line designer-result-line">
+    {% for pos, aa, num_non_human in humanized_humanness.get_positional_humanness(MIN_SUBJ)
+    %}{% set is_vernier = pos.cdr_definition == 'kabat' and pos.is_in_vernier()
+    %}{% set peptide = humanized_humanness.get_peptide(pos, edges=True)
+    %}{% set freqs = humanized_humanness.germline_family_residue_frequency.get(pos)
+    %}<span data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-html="true" data-tooltip-classes="tooltip-medium" data-result-pos="{{ pos }}"
+            class="{% if aa != parental_humanness.chain[pos] %}designer-mut{% endif %} {% if not freqs or freqs.get(aa, 0) < RARE_FAMILY_FREQ %}oasis-seq-aa-rare{% endif %}"
+             title="{{ pos.scheme.title() }} {{ pos }} {% if pos.is_in_cdr() %}(CDR){% elif is_vernier %}(Vernier zone){% endif %}
+             <br>{{ peptide.seq }}: {{ format_percent_subjects(peptide.fraction_oas_subjects) }} subjects
+             <br>{{ format_aa_frequency_tooltip(humanized_humanness.v_germline_family, aa, freqs) }}"
+            style="background-color: rgb(255, {{ 255 - num_non_human**0.80 * 30 }}, {{ 255 - num_non_human**0.65 * 40 }});">{{ aa }}</span>{%
+    endfor %}
+    Result
+  </div>
+  <ul class="nav nav-pills designer-pills mb-3" id="pills-tab-{{ id }}" role="tablist" style="margin-left: 200px;">
+    <li class="nav-item" role="presentation">
+      <button class="nav-link {% if not tab or tab == 'sapiens' %}active{% endif %}" id="pills-sapiens-tab-{{ id }}" data-bs-toggle="pill" data-bs-target="#pills-sapiens-{{ id }}"
+              type="button" role="tab" aria-controls="pills-sapiens-{{ id }}" aria-selected="true">Sapiens score</button>
+    </li>
+    <li class="nav-item" role="presentation">
+      <button class="nav-link {% if tab == 'freq' %}active{% endif %}" id="pills-freq-tab-{{ id }}" data-bs-toggle="pill" data-bs-target="#pills-freq-{{ id }}"
+              type="button" role="tab" aria-controls="pills-freq-{{ id }}" aria-selected="false">Frequency at position</button>
+    </li>
+    <li class="nav-item" role="presentation">
+      <button class="nav-link {% if tab == 'germline' %}active{% endif %}" id="pills-germline-tab-{{ id }}" data-bs-toggle="pill" data-bs-target="#pills-germline-{{ id }}"
+              type="button" role="tab" aria-controls="pills-germline-{{ id }}" aria-selected="false">Germline sequences</button>
+    </li>
+  </ul>
+  <div class="tab-content" id="pills-tabContent-{{ id }}">
+    <div class="tab-pane {% if not tab or tab == 'sapiens' %}show active{% endif %}" id="pills-sapiens-{{ id }}" role="tabpanel" aria-labelledby="pills-sapiens-tab-{{ id }}">
+      <div class="mb-2 font-monospace text-nowrap fs-smaller">
+        {% for scores in humanization.get_top_scores(5) %}
+          <div class="hum-designer-scores designer-line">
+            {% for pos, aa, score in scores
+            %}{% if score > MIN_SAPIENS_SCORE %}<a
+                  href="{{ url_for_arg(pos=pos, aa=aa, tab='sapiens', relative=True) }}"
+                  data-bs-toggle="tooltip" data-bs-html="true"
+                  title="{{ pos.scheme.title() }} {{ pos }} {{ humanized_humanness.chain[pos] }}→{{ aa }}
+                  <br>{{ '{:.0%}'.format(score) }} score"
+                  data-pos="{{ pos }}" {% if humanized_humanness.chain[pos] == aa %}class="aa-match"{% endif %}
+                  style="background: rgb({{255-score**0.5*100}},{{255-score**0.5*150}},{{255}});"
+            >{{aa}}</a>{% else %}<span></span>{% endif %}{%
+            endfor %}
+            #{{ loop.index }} Sapiens score
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+    <div class="tab-pane {% if tab == 'freq' %}show active{% endif %}" id="pills-freq-{{ id }}" role="tabpanel" aria-labelledby="pills-freq-tab-{{ id }}">
+      <div class="mb-2 font-monospace text-nowrap fs-smaller">
+        {% for freqs in humanized_humanness.get_top_freqs(5) %}
+          <div class="hum-designer-scores designer-line">
+            {% for pos, aa, freq in freqs
+            %}{% if freq > MIN_FAMILY_FREQ %}<a
+                  href="{{ url_for_arg(pos=pos, aa=aa, tab='freq', relative=True) }}"
+                  data-bs-toggle="tooltip" data-bs-html="true"
+                  title="{{ pos.scheme.title() }} {{ pos }} {{ humanized_humanness.chain[pos] }}→{{ aa }}
+                  <br>{{ '{:.0%}'.format(freq) }} frequency in {{ humanized_humanness.v_germline_family }}"
+                  data-pos="{{ pos }}" {% if humanized_humanness.chain[pos] == aa %}class="aa-match"{% endif %}
+                  style="background: rgb({{255-freq**0.5*255}},{{255-freq**0.5*100}},{{255-freq**0.5*100}});"
+            >{{ aa }}</a>{% else %}<span></span>{% endif %}{%
+            endfor %}
+            #{{ loop.index }} at germline position
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+    <div class="tab-pane {% if tab == 'germline' %}show active{% endif %}" id="pills-germline-{{ id }}" role="tabpanel" aria-labelledby="pills-germline-tab-{{ id }}">
+        <div class="mb-2 font-monospace text-nowrap fs-smaller">
+          {% set v_germlines = humanized_humanness.get_v_germline_chains(5) %}
+          {% set j_germlines = humanized_humanness.get_j_germline_chains(5) %}
+          {% for i in range(v_germlines | length) %}
+            <div class="designer-line">
+              {% for (imgt_pos, seq_aa), (pos, _) in zip(humanized_humanness.imgt_chain, humanized_humanness.chain)
+              %}{% set germline_aa = v_germlines[i][imgt_pos] or j_germlines[i][imgt_pos] or '-' %}<a
+                    data-bs-toggle="tooltip" title="{{ pos.scheme.title() }} {{ pos }} {{ humanized_humanness.chain[pos] }}→{{ germline_aa }}"
+                    {% if germline_aa != "-" %}href="{{ url_for_arg(pos=pos, aa=germline_aa, tab='germline', relative=True) }}"{% endif %}
+                    {% if seq_aa == germline_aa %}class="aa-match"{% endif %}
+                    style="background: #b3f7b3; {% if pos.is_in_cdr() %}opacity: 0.6;{% endif %}"
+                    data-pos="{{ pos }}">{{ germline_aa }}</a>{%
+              endfor %}
+              {{ v_germlines[i].name }}, {{ j_germlines[i].name }}
+            </div>
+          {% endfor %}
+        </div>
+    </div>
+  </div>
+
+{% endmacro %}
+
+{% block scripts %}
+
+    <script>
+        document.querySelectorAll('[data-pos]').forEach(elem => elem.addEventListener('mouseover', function (event) {
+            var targetPos = elem.getAttribute('data-pos')
+            document.querySelectorAll('[data-result-pos]').forEach(function(elem) {
+                var pos = elem.getAttribute('data-result-pos')
+                if (pos == targetPos) {
+                  elem.classList.add('active')
+                } else {
+                  elem.classList.remove('active')
+                }
+            })
+        }))
+        document.querySelectorAll('[data-pos]').forEach(elem => elem.addEventListener('mouseout', function (event) {
+            document.querySelectorAll('[data-result-pos]').forEach(function(elem) {
+                elem.classList.remove('active')
+            })
+        }))
+        var designerLinks = document.querySelectorAll('.designer-line a');
+        designerLinks.forEach(target => target.addEventListener('click', function (event) {
+            if(target.hasAttribute('href')) {
+              designerLinks.forEach(function(elem) {
+                if (target != elem) {
+                  elem.removeAttribute('href')
+                }
+              })
+              addOverlay();
+            }
+        }))
+        document.querySelectorAll('[data-result-pos]').forEach(target => target.addEventListener('click', function (event) {
+            var targetPos = target.getAttribute('data-result-pos')
+            var previousAA = target.innerHTML
+            var aa = prompt('Enter mutation at ' + targetPos + ' ' + previousAA + ':')
+            if (aa != null && aa != '') {
+              if (aa.length > 1) {
+                alert('Invalid amino acid: '+aa);
+              } else {
+                window.location.href = '?pos='+targetPos+'&aa='+aa {% if result_index %}+'&index={{ result_index }}'{% endif %}
+                addOverlay();
+              }
+            }
+        }))
+
+        function addOverlay() {
+          var overlayElem = document.createElement('div');
+          overlayElem.classList.add('loading-overlay')
+          document.body.appendChild(overlayElem);
+        }
+
+        // Remove overlay at pageshow (Safari keeps showing overlay after back button press)
+        window.addEventListener('pageshow', function(){
+            document.querySelectorAll('.loading-overlay').forEach(elem => elem.remove())
+        });
+
+    </script>
+
+{% endblock %}

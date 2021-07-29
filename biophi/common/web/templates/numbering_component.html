@@ -1,0 +1,24 @@
+<div class="mb-3">
+    <div class="d-inline-block me-3">
+      <label class="form-label" for="scheme_input">
+        Numbering
+      </label>
+      <select class="form-select form-select-sm" style="width: 150px;" id="scheme_input" name="scheme">
+        <option value="kabat" {% if scheme == 'kabat' %}selected{% endif %}>Kabat</option>
+        <option value="chothia" {% if scheme == 'chothia' %}selected{% endif %}>Chothia</option>
+        <option value="imgt" {% if scheme == 'imgt' %}selected{% endif %}>IMGT</option>
+        <option value="aho" {% if scheme == 'aho' %}selected{% endif %}>AHo</option>
+      </select>
+    </div>
+    <div class="d-inline-block">
+      <label class="form-label" for="cdr_definition_input">
+        CDR Definition
+      </label>
+      <select class="form-select form-select-sm" style="width: 150px;" id="cdr_definition_input" name="cdr_definition">
+        <option value="kabat" {% if cdr_definition == 'kabat' %}selected{% endif %}>Kabat</option>
+        <option value="chothia" {% if cdr_definition == 'chothia' %}selected{% endif %}>Chothia</option>
+        <option value="imgt" {% if cdr_definition == 'imgt' %}selected{% endif %}>IMGT</option>
+        <option value="north" {% if cdr_definition == 'north' %}selected{% endif %}>North</option>
+      </select>
+    </div>
+</div>

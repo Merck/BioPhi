@@ -1,0 +1,22 @@
+
+
+.numbered-form>div {
+    padding-left: 60px;
+}
+
+.numbered-form>div:first-child {
+    padding-left: 45px;
+    padding-right: 10px;
+}
+
+.numbered-header {
+    position: relative;
+}
+
+.numbered-header .badge {
+    position: absolute;
+    top: 1px;
+    left: -36px;
+    width: 27px;
+    padding: .35em 0;
+}

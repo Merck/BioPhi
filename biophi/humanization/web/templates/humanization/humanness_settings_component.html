@@ -1,0 +1,26 @@
+
+{% include 'numbering_component.html' %}
+
+<div class="mb-2">
+  <label for="min_subjects" class="form-label">OASis Humanness threshold</label>
+  <div class="mb-3">
+    {% for label, threshold in OASIS_MIN_SUBJECTS_THRESHOLDS.items() %}
+      <div class="form-check me-3 d-inline-block">
+        <input data-radio-disable="#min_subjects" data-value="{{ int(threshold * 100) }}"
+               data-radio-set="#min_subjects"
+               {% if (not humanness_params and label == 'relaxed') or (humanness_params and int(humanness_params.min_fraction_subjects*100) == int(threshold*100)) %}checked{% endif %}
+               class="form-check-input" type="radio" name="min_subjects" value="{{ label }}" id="min_subjects_{{ label }}">
+        <label class="form-check-label" for="min_subjects_{{ label }}">{{ label }}</label>
+      </div>
+    {% endfor %}
+    <div class="form-check d-inline-block me-3">
+      <input data-radio-enable="#min_subjects" class="form-check-input" type="radio" name="min_subjects" value="custom" id="min_subjects_custom">
+      <label class="form-check-label" for="min_subjects_custom">custom</label>
+    </div>
+    <div class="d-inline-block" style="white-space: nowrap;">
+      <input type="text" size="3" style="width: 3em; display: inline-block;"
+           value="10" min="1" max="90" class="form-control form-control-sm" id="min_subjects" name="custom_min_subjects">
+      <span class="form-text">%&nbsp;subjects</span>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,16 @@
+{% extends "layout.html" %}
+{% set active_nav = "humanness" %}
+
+{% block head %}
+    {{ super() }}
+    <link href="{{ url_for('.static', filename='humanization.css') | autoversion }}" rel="stylesheet">
+{% endblock %}
+
+{% block container %}
+  <div class="container">
+    {% include 'flash.html' %}
+
+    {% block main %}
+    {% endblock %}
+  </div>
+{% endblock %}

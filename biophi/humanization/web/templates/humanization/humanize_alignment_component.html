@@ -1,0 +1,72 @@
+{% macro format_aa_frequency(freq, percent=True) %}{%
+if freq is none %}?{% else %}{{
+'{:.0f}'.format(freq*100) if freq >= 0.01 else ('{:.1f}'.format(freq*100) if freq >= 0.001 else '<0.1') }}{{ '%' if percent else '' }}{% endif
+%}{% endmacro %}
+
+{% macro format_aa_frequency_tooltip(v_germline_family, aa, freqs) %}
+{% if freqs %}
+  Frequency in {{ v_germline_family }}: {{ aa }}={{ format_aa_frequency(freqs.get(aa, 0) if freqs else none) }}
+  <br>({%
+  for aa in sorted(freqs or {}, key=freqs.get, reverse=True)[:3]
+  %}{% if loop.index != 1 %}, {% endif %}{{aa}}={{ format_aa_frequency(freqs[aa]) }}{%
+  endfor %})
+{% else %}
+  Frequency for {{ v_germline_family }} not available
+{% endif %}
+{% endmacro %}
+
+{% macro format_percent_subjects(freq) %}{%
+if freq is none %}?{%
+elif freq >= 0.01 or freq == 0 %}{{ '{:.0%}'.format(freq | round(2, 'floor'))  }}{%
+else %}{{ '{:.1%}'.format(freq | round(3, 'floor')) }}{%
+endif %}{%
+endmacro %}
+
+{% macro annot_num(num, suffix_many, suffix_one)
+%}{{big_number_format(num, precision=0)}}<span class="text-secondary">{% if suffix_one and num == 1 %}&nbsp;{{suffix_one}}{% elif suffix_many %}&nbsp;{{suffix_many}}{% endif %}</span>{%
+endmacro %}
+
+{% macro oasis_sequence_pair(parental_humanness, humanized_humanness, min_subj, url='', num_germlines=5) %}
+  <div class="mb-2 font-monospace text-nowrap fs-smaller">
+    {% for pos, aa, num_non_human in parental_humanness.get_positional_humanness(min_subj)
+    %}{% set peptide = parental_humanness.get_peptide(pos, edges=True)
+    %}{% set freqs = parental_humanness.germline_family_residue_frequency.get(pos)
+    %}<a href="{{ url }}#{{ pos }}" class="oasis-seq-aa {% if aa != humanized_humanness.chain[pos] %}oasis-seq-aa-mut{% endif %}"
+         data-bs-toggle="tooltip" data-tooltip-classes="tooltip-wide" data-bs-html="true"
+             title="{{ pos.scheme.title() }} {{ pos }}
+             <br>{{ peptide.seq }}: {{ format_percent_subjects(peptide.fraction_oas_subjects) }} subjects
+             <br>{{ format_aa_frequency_tooltip(parental_humanness.v_germline_family, aa, freqs) }}
+             "
+            style="border-top: 3px solid {% if pos.is_in_cdr() %}#777777{% elif pos.cdr_definition == 'kabat' and pos.is_in_vernier() %}#cccccc{% else %}white{% endif %};
+            background-color: rgb(255, {{ 255 - num_non_human**0.80 * 30 }}, {{ 255 - num_non_human**0.65 * 40 }});">{{ aa }}</a>{%
+    endfor %}
+    Parental
+  </div>
+  <div class="mb-2 font-monospace text-nowrap fs-smaller">
+    {% for pos, aa, num_non_human in humanized_humanness.get_positional_humanness(min_subj)
+    %}{% set peptide = humanized_humanness.get_peptide(pos, edges=True)
+    %}{% set freqs = humanized_humanness.germline_family_residue_frequency.get(pos)
+    %}<a href="{{ url }}#{{ pos }}" class="oasis-seq-aa {% if not freqs or freqs.get(aa, 0) < RARE_FAMILY_FREQUENCY %}oasis-seq-aa-rare{% endif %}"
+             data-bs-toggle="tooltip" data-bs-html="true" data-tooltip-classes="tooltip-wide"
+             title="{{ pos.scheme.title() }} {{ pos }}
+             <br>{{ peptide.seq }}: {{ format_percent_subjects(peptide.fraction_oas_subjects) }} subjects
+             <br>{{ format_aa_frequency_tooltip(humanized_humanness.v_germline_family, aa, freqs) }}
+             "
+            style="background-color: rgb(255, {{ 255 - num_non_human**0.80 * 30 }}, {{ 255 - num_non_human**0.65 * 40 }});">{{ aa }}</a>{%
+    endfor %}
+    Humanized
+  </div>
+  <div class="mb-3">
+    {% set v_germlines = humanized_humanness.get_v_germline_chains(num_germlines) %}
+    {% set j_germlines = humanized_humanness.get_j_germline_chains(num_germlines) %}
+    {% for i in range(v_germlines | length) %}
+      <div class="font-monospace fs-smaller">
+        {% for pos, seq_aa in humanized_humanness.imgt_chain
+        %}{% set germline_aa = v_germlines[i][pos] or j_germlines[i][pos] or '-' %}<span
+              style="{% if seq_aa == germline_aa %}background: #b3f7b3;{% endif %}" class="d-inline-block">{{ germline_aa }}</span>{%
+        endfor %}
+        {{ v_germlines[i].name }}, {{ j_germlines[i].name }}
+      </div>
+    {% endfor %}
+  </div>
+{% endmacro %}

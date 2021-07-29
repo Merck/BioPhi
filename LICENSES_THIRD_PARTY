@@ -1,0 +1,62 @@
+ Name                    Version    License                                              URL
+ Cython                  0.29.23    Apache Software License                              http://cython.org/
+ Flask                   2.0.1      BSD License                                          https://palletsprojects.com/p/flask
+ Flask-Humanize          0.3.0      MIT License                                          https://github.com/vitalk/flask-humanize
+ Jinja2                  3.0.1      BSD License                                          https://palletsprojects.com/p/jinja/
+ MarkupSafe              2.0.1      BSD License                                          https://palletsprojects.com/p/markupsafe/
+ PyYAML                  5.4.1      MIT License                                          https://pyyaml.org/
+ SQLAlchemy              1.4.19     MIT License                                          http://www.sqlalchemy.org
+ Werkzeug                2.0.1      BSD License                                          https://palletsprojects.com/p/werkzeug/
+ XlsxWriter              1.4.3      BSD License                                          https://github.com/jmcnamara/XlsxWriter
+ abnumber                0.2.6      MIT                                                  https://github.com/prihoda/abnumber
+ amqp                    5.0.6      BSD License                                          http://github.com/celery/py-amqp
+ anarci                  2020.04.23 See url                                              https://github.com/oxpig/ANARCI/blob/master/LICENCE
+ antlr4-python3-runtime  4.8        BSD                                                  http://www.antlr.org
+ attrs                   21.2.0     MIT License                                          https://www.attrs.org/
+ billiard                3.6.4.0    BSD License                                          https://github.com/celery/billiard
+ biophi                  1.0.0      MIT                                                  https://github.com/Merck/BioPhi
+ biopython               1.79       Freely Distributable                                 https://biopython.org/
+ celery                  5.1.1      BSD License                                          http://celeryproject.org
+ certifi                 2021.5.30  Mozilla Public License 2.0 (MPL 2.0)                 https://certifiio.readthedocs.io/en/latest/
+ cffi                    1.14.5     MIT License                                          http://cffi.readthedocs.org
+ chardet                 4.0.0      GNU Library or Lesser General Public License (LGPL)  https://github.com/chardet/chardet
+ click                   7.1.2      BSD License                                          https://palletsprojects.com/p/click/
+ click-didyoumean        0.0.3      BSD License                                          https://github.com/timofurrer/click-didyoumean
+ click-plugins           1.1.1      BSD License                                          https://github.com/click-contrib/click-plugins
+ click-repl              0.2.0      MIT                                                  https://github.com/untitaker/click-repl
+ dataclasses             0.6        Apache Software License                              https://github.com/ericvsmith/dataclasses
+ fairseq                 0.10.2     MIT License                                          https://github.com/pytorch/fairseq
+ greenlet                1.1.0      MIT License                                          https://greenlet.readthedocs.io/
+ humanize                3.9.0      MIT License                                          https://github.com/jmoiron/humanize
+ hydra-core              1.1.0      MIT License                                          https://github.com/facebookresearch/hydra
+ idna                    2.10       BSD License                                          https://github.com/kjd/idna
+ importlib-resources     5.1.4      Apache Software License                              https://github.com/python/importlib_resources
+ iniconfig               1.1.1      MIT License                                          http://github.com/RonnyPfannschmidt/iniconfig
+ itsdangerous            2.0.1      BSD License                                          https://palletsprojects.com/p/itsdangerous/
+ kombu                   5.1.0      BSD License                                          https://kombu.readthedocs.io
+ numpy                   1.21.0     BSD License                                          https://www.numpy.org
+ omegaconf               2.1.0      BSD License                                          https://github.com/omry/omegaconf
+ packaging               20.9       Apache Software License, BSD License                 https://github.com/pypa/packaging
+ pandas                  1.2.5      BSD                                                  https://pandas.pydata.org
+ pluggy                  0.13.1     MIT License                                          https://github.com/pytest-dev/pluggy
+ portalocker             2.0.0      PSF                                                  https://github.com/WoLpH/portalocker
+ prompt-toolkit          3.0.19     BSD License                                          https://github.com/prompt-toolkit/python-prompt-toolkit
+ py                      1.10.0     MIT License                                          https://py.readthedocs.io/
+ pycparser               2.20       BSD License                                          https://github.com/eliben/pycparser
+ pyparsing               2.4.7      MIT License                                          https://github.com/pyparsing/pyparsing/
+ pytest                  6.2.4      MIT License                                          https://docs.pytest.org/en/latest/
+ python-dateutil         2.8.1      BSD License, Apache Software License                 https://dateutil.readthedocs.io
+ pytz                    2021.1     MIT License                                          http://pythonhosted.org/pytz
+ redis                   3.5.3      MIT License                                          https://github.com/andymccurdy/redis-py
+ regex                   2021.4.4   Apache Software License                              https://bitbucket.org/mrabarnett/mrab-regex
+ requests                2.25.1     Apache Software License                              https://requests.readthedocs.io
+ sacrebleu               1.5.1      Apache Software License                              https://github.com/mjpost/sacrebleu
+ six                     1.16.0     MIT License                                          https://github.com/benjaminp/six
+ toml                    0.10.2     MIT License                                          https://github.com/uiri/toml
+ torch                   1.9.0      BSD License                                          https://pytorch.org/
+ tqdm                    4.61.1     MIT License, Mozilla Public License 2.0 (MPL 2.0)    https://tqdm.github.io
+ typing-extensions       3.10.0.0   Python Software Foundation License                   https://github.com/python/typing/blob/master/typing_extensions/README.rst
+ urllib3                 1.26.5     MIT License                                          https://urllib3.readthedocs.io/
+ vine                    5.0.0      BSD License                                          http://github.com/celery/vine
+ wcwidth                 0.2.5      MIT License                                          https://github.com/jquast/wcwidth
+ zipp                    3.4.1      MIT License                                          https://github.com/jaraco/zipp

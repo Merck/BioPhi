@@ -1,0 +1,187 @@
+{% extends "humanization/humanize_layout.html" %}
+{% set title = "Humanization Result" %}
+
+{% set SORTABLE = 'sortable' if not has_next_page and not has_prev_page %}
+{% set RARE_FAMILY_FREQUENCY = 0.01 %}
+
+{%
+  from 'humanization/humanize_alignment_component.html'
+  import oasis_sequence_pair with context
+%}
+
+{% block main %}
+
+<div class="mb-3 mt-3 row">
+  <div class="col-8">
+    <a class="btn btn-light" href="{{ url_for('biophi_humanization.humanize_get') }}">
+      {{ icon('chevron-left') }} Input
+    </a>
+  </div>
+
+  <div class="col-4 text-end">
+    {% if show == 'alignments' %}
+        <a class="btn btn-light" href="{{ url_for_arg(show='table') }}">{{ icon('table') }} Show table</a>
+    {% else %}
+        <a class="btn btn-light" href="{{ url_for_arg(show='alignments') }}">{{ icon('list-nested') }} Show alignments</a>
+    {% endif %}
+    <div class="d-inline-block">
+      <a class="btn btn-light" href="{{ url_for('biophi_humanization.humanize_get', humanize_task_id=task_id) }}">
+        {{ icon('arrow-repeat') }} Re-run
+      </a>
+    </div>
+    <div class="dropdown d-inline-block">
+      <a class="btn btn-primary dropdown-toggle" role="button" id="exportDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+        Export
+      </a>
+      <ul class="dropdown-menu" aria-labelledby="exportDropdown">
+        <li>
+          <a class="dropdown-item" target="_blank"
+               href="{{ url_for('biophi_humanization.humanize_batch_export_humanized_fasta', task_id=task_id) }}">Humanized FASTA</a>
+        </li>
+        <li>
+          <a class="dropdown-item" target="_blank"
+               href="{{ url_for('biophi_humanization.humanize_batch_export_alignments', task_id=task_id) }}">Alignments</a>
+        </li>
+        <li>
+          <a class="dropdown-item" target="_blank"
+               href="{{ url_for('biophi_humanization.humanize_batch_export_table', task_id=task_id) }}">Summary table</a>
+        </li>
+        <li>
+          <a class="dropdown-item" target="_blank"
+               href="{{ url_for('biophi_humanization.humanize_batch_export_table', task_id=task_id, full=1) }}">Full table</a>
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="col-12 mt-3">
+    <h3>Humanization results</h3>
+    <p class="text-secondary">
+      {% with result = results[0] %}
+        {% include 'humanization/humanize_params_summary.html' %}
+      {% endwith %}
+    </p>
+
+    {% if has_both_chain_types and num_unpaired %}
+    <div class="alert alert-warning alert-dismissible fade show" role="alert">
+      Found {{ '{:,}'.format(num_unpaired) }} unpaired {{ 'chains' if num_unpaired > 1 else 'chain' }}.<br>
+      <small>Please use the same fasta ID for heavy and light chain (no spaces, optionally with _VH and _VL suffix).</small>
+    </div>
+    {% endif %}
+
+    {% if show == 'alignments' %}
+      {% for result in results %}
+        {% set min_subj = result.oasis_params.min_fraction_subjects if result.oasis_params else none %}
+        {% set detail_url = url_for('biophi_humanization.humanize_detail_get', task_id=task_id, index=loop.index) %}
+        <h3>{{ result.input.name }} <a class="btn btn-light btn-sm" href="{{ detail_url }}">Show detail</a></h3>
+        {% if result.humanized_humanness.vh %}
+          <h5>Heavy chain</h5>
+          {{
+            oasis_sequence_pair(result.parental_humanness.vh, result.humanized_humanness.vh, min_subj, url=detail_url, num_germlines=1)
+          }}
+        {% endif %}
+
+        {% if result.humanized_humanness.vl %}
+          <h5>Light chain</h5>
+          {{
+            oasis_sequence_pair(result.parental_humanness.vl, result.humanized_humanness.vl, min_subj, url=detail_url, num_germlines=1)
+          }}
+        {% endif %}
+
+      {% endfor %}
+    {% else %}
+      <table class="table table-humanization-summary table-hover">
+      <thead>
+        <tr>
+          <th class="border-end"></th>
+          <th class="border-end" colspan="2">OASis Percentile</th>
+          <th class="border-end" colspan="2">OASis Identity</th>
+          <th class="border-end" colspan="2">Germline identity</th>
+          <th class="border-end" colspan="2">Germlines</th>
+          <th class="border-end" colspan="2">Humanizing mutations</th>
+          <th></th>
+        </tr>
+      </thead>
+      <thead>
+        <tr>
+          <th class="{{ SORTABLE }} border-end">Name</th>
+          <th class="{{ SORTABLE }}">Before</th>
+          <th class="{{ SORTABLE }} border-end">After</th>
+          <th class="{{ SORTABLE }}">Before</th>
+          <th class="{{ SORTABLE }} border-end">After</th>
+          <th class="{{ SORTABLE }}">Before</th>
+          <th class="{{ SORTABLE }} border-end">After</th>
+          <th class="{{ SORTABLE }}">VH</th>
+          <th class="{{ SORTABLE }} border-end">VL</th>
+          <th class="{{ SORTABLE }}">VH</th>
+          <th class="{{ SORTABLE }} border-end">VL</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for result in results %}
+          {% set min_subj = result.oasis_params.min_fraction_subjects if result.oasis_params else none %}
+          {% set detail_url = url_for('biophi_humanization.humanize_detail_get', task_id=task_id, index=loop.index) %}
+          <tr data-href="{{ detail_url }}">
+            <td class="border-end">{{ result.input.name }}</td>
+            {% if isinstance(result, Exception) %}
+              <td class="border-end text-danger" colspan="10">Failed: {{ result }}</td>
+            {% else %}
+              <td class="bg-spectral{{ '{:.0f}'.format(result.parental_humanness.get_oasis_percentile(min_subj)*100) }}">{{ '{:.0%}'.format(result.parental_humanness.get_oasis_percentile(min_subj)) }}</td>
+              <td class="border-end bg-spectral{{ '{:.0f}'.format(result.humanized_humanness.get_oasis_percentile(min_subj)*100) }}">{{ '{:.0%}'.format(result.humanized_humanness.get_oasis_percentile(min_subj)) }}</td>
+              <td>{{ '{:.0%}'.format(result.parental_humanness.get_oasis_identity(min_subj)) }}</td>
+              <td>{{ '{:.0%}'.format(result.humanized_humanness.get_oasis_identity(min_subj)) }}</td>
+              <td>{{ '{:.0%}'.format(result.parental_humanness.get_germline_content()) }}</td>
+              <td class="border-end">{{ '{:.0%}'.format(result.humanized_humanness.get_germline_content()) }}</td>
+              {% if result.humanized_humanness.vh %}
+                <td class="border-end">{{ result.humanized_humanness.vh.v_germline_names[0] }}</td>
+              {% else %}
+                <td>-</td>
+              {% endif %}
+              {% if result.humanized_humanness.vl %}
+                <td class="border-end">{{ result.humanized_humanness.vl.v_germline_names[0] }}</td>
+              {% else %}
+                <td>-</td>
+              {% endif %}
+              {% if result.humanization.vh %}
+                <td>{{ result.humanization.vh.num_mutations() }}</td>
+              {% else %}
+                <td>-</td>
+              {% endif %}
+              {% if result.humanization.vl %}
+                <td>{{ result.humanization.vl.num_mutations() }}</td>
+              {% else %}
+                <td>-</td>
+              {% endif %}
+            {% endif %}
+            <td>
+              <a class="btn btn-sm btn-light" href="{{ detail_url }}">
+                Detail
+              </a>
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% endif %}
+
+    {% if has_next_page or has_prev_page %}
+    <div class="text-center">
+      <div class="btn-group">
+        {% if has_prev_page %}
+          <a class="btn btn-light" href="{{ url_for_arg(page=page-1) }}">&lt; Previous page</a>
+        {% else %}
+          <a class="btn btn-light disabled">&lt; Previous page</a>
+        {% endif %}
+        {% if has_next_page %}
+          <a class="btn btn-light" href="{{ url_for_arg(page=page+1) }}">Next page &gt;</a>
+        {% else %}
+          <a class="btn btn-light disabled">Next page &gt;</a>
+        {% endif %}
+      </div>
+    </div>
+    {% endif %}
+  </div>
+
+</div>
+{% endblock %}

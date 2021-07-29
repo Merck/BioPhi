@@ -1,0 +1,33 @@
+{% extends "humanization/designer_layout.html" %}
+{% set title = "Designer Input" %}
+
+
+{% block header %}
+  <div id="header" style="background-position: center 30%">
+    <div class="container">
+      <h1 class="display-1 fw-lighter">Designer</h1>
+      <p class="lead">
+        Perform mutations on an antibody sequence while monitoring sequence properties in real time.
+      </p>
+    </div>
+  </div>
+{% endblock %}
+
+
+{% block main %}
+<form id="upload" action="{{ url_for('biophi_humanization.humanize_post', designer='yes') }}"
+      method="post" class="row numbered-form g-3" enctype="multipart/form-data">
+  <div class="col-md-5">
+    <h4 class="numbered-header mt-2 mb-3"><span class="badge bg-primary">1</span>Input sequence</h4>
+    {% include 'antibody_single_input_component.html' %}
+  </div>
+  <div class="col-md-7">
+    <h4 class="numbered-header mt-2 mb-3"><span class="badge bg-primary">2</span>Settings</h4>
+    {% include 'humanization/humanness_settings_component.html' %}
+    <input type="submit" name="submit" class="btn btn-primary btn-lg" value="Submit">
+  </div>
+</form>
+{% endblock %}
+
+
+

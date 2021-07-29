@@ -1,0 +1,140 @@
+.navbar {
+    box-shadow: inset 0 -4px 7px #151515;
+    padding-top: 0.15rem;
+    padding-bottom: 0.15rem;
+    color: white;
+}
+.navbar-brand {
+    padding-top: 0.05rem;
+}
+.navbar-dark .navbar-nav .nav-link {
+    color: rgba(255,255,255,.70);
+}
+
+.navbar-dark .navbar-nav .nav-link:focus, .navbar-dark .navbar-nav .nav-link:hover {
+    color: rgba(255,255,255,.90);
+}
+
+#header {
+    background-position: center 80%;
+    background-size: cover;
+    background-image: url('/static/img/header.png');
+    background-color: #14143b;
+    padding: 30px 0;
+    color: white;
+    margin-bottom: 20px;
+}
+
+#header h1, #header h5 {
+    text-shadow: 1px 1px 10px #552255;
+}
+
+#header p {
+    text-shadow: 1px 1px 3px #552255;
+}
+
+#header-cards {
+    margin-top: 60px;
+}
+
+#header-cards .card {
+    background: rgba(9, 10, 74, 0.7);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+#header-cards .card:hover {
+    background: rgba(9, 0, 60, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.4);
+}
+
+#header-cards .card p {
+    min-height: 95px;
+}
+
+#header-cards .stretched-link::after {
+    cursor: pointer !important;
+    z-index: 100;
+}
+
+#header-cards .card, #header-cards .stretched-link {
+    cursor: pointer !important;
+}
+
+#news .list-group-item {
+    padding-left: 0;
+}
+
+.bi {
+    display: inline-block;
+    vertical-align: text-bottom;
+}
+
+.fs-small {
+    font-size: 90%;
+}
+
+.fs-smaller {
+    font-size: 85%;
+}
+
+.opacity-50 {
+    opacity: 0.5 !important;
+}
+
+.opacity-60 {
+    opacity: 0.60 !important;
+}
+
+.opacity-75 {
+    opacity: 0.75 !important;
+}
+
+.opacity-80 {
+    opacity: 0.8 !important;
+}
+
+.vertical-header span {
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  text-align: left;
+  max-height: 150px;
+}
+
+/* vertical divider of table column sections */
+.col-section-end {
+    border-right: 1px solid #aaa;
+}
+
+/* light grey text under a heading */
+p.subheading {
+    font-size: 110%;
+    margin-top: -5px;
+    color: #666666;
+}
+
+.table-xs>:not(caption)>*>* {
+    padding: .1rem .1rem;
+    font-size: 80%;
+}
+
+.tooltip-wide .tooltip-inner {
+   max-width: 360px;
+   width: 360px;
+}
+
+.tooltip-medium .tooltip-inner {
+   max-width: 280px;
+   width: 280px;
+}
+
+tr[data-href] {
+    cursor: pointer;
+}
+
+th.sortable {
+    cursor: pointer;
+}
+
+th.sorted-asc, th.sorted-desc {
+    font-style: italic;
+}

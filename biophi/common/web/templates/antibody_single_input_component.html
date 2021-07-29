@@ -1,0 +1,36 @@
+{% if input_vh_example is undefined %}
+  {% set input_vh_example = 'QVQLQQSGAELARPGASVKMSCKASGYTFTRYTMHWVKQRPGQGLEWIGYINPSRGYTNYNQKFKDKATLTTDKSSSTAYMQLSSLTSEDSAVYYCARYYDDHYCLDYWGQGTTLTVSS' %}
+{% endif %}
+{% if input_vl_example is undefined %}
+  {% set input_vl_example = 'QIVLTQSPAIMSASPGEKVTMTCSASSSVSYMNWYQQKSGTSPKRWIYDTSKLASGVPAHFRGSGSGTSYSLTISGMEAEDAATYYCQQWSSNPFTFGSGTKLEIN' %}
+{% endif %}
+
+<div class="mb-2">
+  <label for="name_input" class="form-label">Name (optional)</label>
+  <input class="form-control form-control-sm" id="name_input" name="name"
+         placeholder="Antibody1" value="{{ antibody_name }}" style="max-width: 300px;">
+</div>
+<div class="row mb-2">
+    <div class="col-7"><label for="vh_input" class="form-label">Heavy chain</label></div>
+    <div class="col-5 text-end">
+      <a href="#vh_input" class="link-secondary text-decoration-none"
+         data-inject-example="{{ input_vh_example }}">
+        {{ icon('arrow-down-square-fill') }} Use example
+      </a>
+    </div>
+    <div class="col-12">
+      <textarea class="form-control form-control-sm" id="vh_input" name="vh" rows="3" placeholder="QVQLQ...">{{ heavy_sequence }}</textarea>
+    </div>
+</div>
+<div class="row mb-2">
+  <div class="col-7"><label for="vl_input" class="form-label">Light chain</label></div>
+  <div class="col-5 text-end">
+    <a href="#vl_input" class="link-secondary text-decoration-none"
+       data-inject-example="{{ input_vl_example }}">
+      {{ icon('arrow-down-square-fill') }} Use example
+    </a>
+  </div>
+  <div class="col-12">
+    <textarea class="form-control form-control-sm" id="vl_input" name="vl" rows="3" placeholder="DIVMT...">{{ light_sequence }}</textarea>
+  </div>
+</div>

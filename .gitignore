@@ -1,0 +1,8 @@
+.ipynb_checkpoints
+*.pyc
+*.egg-info
+work
+.idea
+.DS_Store
+.kube-tmp-token
+tests/robot/results

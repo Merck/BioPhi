@@ -1,0 +1,286 @@
+{% extends "humanization/humanize_layout.html" %}
+{% set title = result.input.name + " - Humanization result" %}
+
+{% set MIN_SUBJ = result.oasis_params.min_fraction_subjects %}
+{% set RARE_FAMILY_FREQUENCY = 0.01 %}
+
+{%
+  from 'humanization/humanize_alignment_component.html'
+  import oasis_sequence_pair, format_percent_subjects, format_aa_frequency_tooltip, format_aa_frequency, annot_num with context
+%}
+
+{% block main %}
+
+
+
+<div class="row mt-3">
+  <div class="col-sm-3">
+    <a class="btn btn-light" href="{{ url_for('biophi_humanization.humanize_results_get', task_id=task_id) }}">
+      {{ icon('chevron-left') }} Results
+    </a>
+  </div>
+  <div class="col-sm-9 d-print-none">
+    <div class="mb-3 text-end dropdown">
+      <div class="d-inline-block">
+        <a class="btn btn-light" href="{{ url_for('biophi_humanization.humanize_get', humanize_task_id=task_id, index=result_index) }}">
+          {{ icon('arrow-repeat') }} Re-run
+        </a>
+      </div>
+      <div class="d-inline-block">
+        <a class="btn btn-light" target="_blank" href="{{ url_for('biophi_humanization.designer_detail_get', task_id=result_task_id) }}">
+          {{ icon('pencil') }} Edit in Designer
+        </a>
+      </div>
+      <div class="d-inline-block">
+        <a class="btn btn-primary dropdown-toggle" role="button" id="exportDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+          Export
+        </a>
+        <ul class="dropdown-menu" aria-labelledby="exportDropdown">
+          <li>
+            <a class="dropdown-item" target="_blank"
+                 href="{{ url_for('biophi_humanization.humanize_detail_export_humanized_fasta', task_id=task_id, index=result_index) }}">Humanized FASTA</a>
+          </li>
+          <li>
+            <a class="dropdown-item" target="_blank"
+                 href="{{ url_for('biophi_humanization.humanize_detail_export_alignment', task_id=task_id, index=result_index) }}">Alignment</a>
+          </li>
+          <li>
+            <a class="dropdown-item" target="_blank"
+                 href="{{ url_for('biophi_humanization.humanize_detail_export_oasis_table', task_id=task_id, index=result_index) }}">OASis table</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="col-sm-12">
+    <h3>Humanization <span class="text-secondary fw-light">{{ result.input.name }}</span></h3>
+    <p class="text-secondary">{% include 'humanization/humanize_params_summary.html' %}</p>
+  </div>
+</div>
+
+<div class="card-group mb-3" style="max-width: 1150px;">
+  <div class="card">
+    <div class="card-body">
+      <h5 class="card-title">
+        <span style="padding: .35em" class="badge fs-5 fw-light bg-spectral{{ '{:.0f}'.format(result.parental_humanness.get_oasis_percentile(MIN_SUBJ)*100) }}">
+          {{ '{:.0%}'.format(result.parental_humanness.get_oasis_percentile(MIN_SUBJ)) }}
+        </span>&nbsp;<span class="fw-light">→</span>&nbsp;<span
+              style="padding: .35em"
+              class="badge fs-5 bg-spectral{{ '{:.0f}'.format(result.humanized_humanness.get_oasis_percentile(MIN_SUBJ)*100) }}">
+          {{ '{:.0%}'.format(result.humanized_humanness.get_oasis_percentile(MIN_SUBJ)) }}
+        </span>
+        OASis percentile
+      </h5>
+      <p class="card-text"><small>Percentile of "OASis identity" among therapeutic antibodies</small></p>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-body">
+      <h5 class="card-title">
+        <span class="badge fs-5 text-dark bg-light">
+          <span class="fw-light">{{ '{:.0%}'.format(result.parental_humanness.get_oasis_identity(MIN_SUBJ))
+          }}&nbsp;→&nbsp;</span>{{ '{:.0%}'.format(result.humanized_humanness.get_oasis_identity(MIN_SUBJ)) }}
+        </span>
+        OASis identity
+      </h5>
+      <p class="card-text"><small>Fraction of 9-mer peptides found in at least {{ '{:.0%}'.format(MIN_SUBJ) }} of human subjects</small></p>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-body">
+      <h5 class="card-title">
+        <span class="badge fs-5 text-dark bg-light">
+          <span class="fw-light">{{ '{:.0%}'.format(result.parental_humanness.get_germline_content())
+          }}&nbsp;→&nbsp;</span>{{ '{:.0%}'.format(result.humanized_humanness.get_germline_content()) }}
+        </span>
+        Germline content
+      </h5>
+      <p class="card-text"><small>Sequence identity with nearest heavy and light human germline sequences.</small></p>
+    </div>
+  </div>
+</div>
+
+{% if result.humanized_humanness.vh %}
+  <h4>Heavy chain</h4>
+  {{
+    oasis_sequence_pair(result.parental_humanness.vh, result.humanized_humanness.vh, MIN_SUBJ)
+  }}
+{% endif %}
+
+{% if result.humanized_humanness.vl %}
+  <h4>Light chain</h4>
+  {{
+    oasis_sequence_pair(result.parental_humanness.vl, result.humanized_humanness.vl, MIN_SUBJ)
+  }}
+{% endif %}
+
+<div class="row">
+  <div class="col-8">
+    <h3>Detailed view</h3>
+  </div>
+  <div class="col-4 text-end">
+    <a class="btn btn-light" data-bs-toggle="collapse" href="#" data-bs-target=".not-mutated-row" role="button">
+      Show mutations only
+    </a>
+  </div>
+</div>
+
+{% if result.humanization.vh %}
+  <h4>Heavy chain</h4>
+  {{ humanization_table(result.humanization.vh, result.parental_humanness.vh, result.humanized_humanness.vh) }}
+{% endif %}
+
+{% if result.humanization.vl %}
+  <h4>Light chain</h4>
+  {{ humanization_table(result.humanization.vl, result.parental_humanness.vl, result.humanized_humanness.vl) }}
+{% endif %}
+
+{% endblock %}
+
+
+
+
+{% macro format_peptide_aa(peptide, aa, loop_index) %}{% if loop_index == (((peptide | length) / 2) | round(0, 'ceil') | int) %}<span class="peptide-center">{{ aa }}</span>{% else %}{{ aa }}{% endif %}{% endmacro %}
+
+{% macro format_peptide(peptide, other_peptide) %}
+{% for a, b in zip(peptide, other_peptide) %}{% if a != b %}<strong>{{ format_peptide_aa(peptide, a, loop.index) }}</strong>{% else %}{{format_peptide_aa(peptide, a, loop.index) }}{% endif %}{% endfor %}
+{% endmacro %}
+
+
+{% macro annot_change(num_before, num_after, fmt='{:,}') %}{%
+if num_before > num_after
+      %}<span class="text-danger">({{ fmt.format(num_after - num_before) }})</span>{%
+elif num_before < num_after
+      %}<span class="text-success">(+{{ fmt.format(num_after - num_before) }})</span>{%
+endif
+%}{% endmacro %}
+
+{% macro humanness_row(parental, humanized) %}
+  {% if parental and humanized and parental.seq != humanized.seq %}
+    <td class="text-center {% if not parental.is_human(MIN_SUBJ) %}text-danger{% endif %}">{{ format_peptide(parental.seq, humanized.seq) }}</td>
+    <td class="text-center col-section-end {% if not humanized.is_human(MIN_SUBJ) %}text-danger{% endif %}">{{ format_peptide(humanized.seq, parental.seq) }}</td>
+    <td>
+      {{ format_percent_subjects(parental.fraction_oas_subjects)
+      }}&nbsp;→&nbsp;{{
+      format_percent_subjects(humanized.fraction_oas_subjects) }}&nbsp;<span class="text-secondary">subjs</span>&nbsp;{%
+      if parental.fraction_oas_subjects is not none and humanized.fraction_oas_subjects is not none %}{{
+      annot_change(parental.fraction_oas_subjects | round(2, 'floor'), humanized.fraction_oas_subjects | round(2, 'floor'), fmt='{:.0%}')
+      }}{% endif %}
+    </td>
+    <td>
+      {{ annot_num(parental.num_oas_occurrences) }}&nbsp;→&nbsp;{{ annot_num(humanized.num_oas_occurrences, 'seqs', 'seq') }}&nbsp;{%
+      if parental.num_oas_occurrences is not none and humanized.num_oas_occurrences is not none %}{{
+      annot_change(parental.num_oas_occurrences, humanized.num_oas_occurrences) }}{% endif %}
+    </td>
+   {% elif humanized %}
+    <td class="text-center text-secondary {% if parental and not parental.is_human(MIN_SUBJ) %}text-danger{% endif %}">{{ format_peptide(parental.seq, humanized.seq) if parental else "-" }}</td>
+    <td class="text-center text-secondary col-section-end {% if not humanized.is_human(MIN_SUBJ) %}text-danger{% endif %}">{{ format_peptide(humanized.peptide, parental.peptide) if parental else humanized.peptide }}</td>
+    <td class="text-secondary">{{ format_percent_subjects(humanized.fraction_oas_subjects) }}&nbsp;subjs</td>
+    <td class="text-secondary">{{ annot_num(humanized.num_oas_occurrences, 'seqs', 'seq') }}</td>
+  {% else %}
+    <td class="text-center text-secondary {% if not parental.is_human(MIN_SUBJ) %}text-danger{% endif %}">
+      {{ format_peptide(parental.seq, humanized.seq) if humanized else parental.seq }}
+    </td>
+    <td class="text-center text-secondary col-section-end {% if humanized and not humanized.is_human(MIN_SUBJ) %}text-danger{% endif %}">
+      {{ format_peptide(humanized.seq, parental.seq) if humanized else "-" }}
+    </td>
+    <td class="text-secondary">{{ format_percent_subjects(parental.fraction_oas_subjects) }}&nbsp;subjs</td>
+    <td class="text-secondary">{{ annot_num(parental.num_oas_occurrences, 'seqs', 'seq') }}</td>
+  {% endif %}
+{% endmacro %}
+
+{% macro mark_section_boundary(parental, humanized, pos) %}{%
+if not parental.has_position(pos) and not humanized.has_position(pos) %}table-humanization-section{% endif
+%}{% endmacro %}
+
+{% macro humanization_table(chain_humanization, parental_humanness, humanized_humanness) %}
+    <table class="table table-humanization w-auto">
+      <thead>
+        <tr>
+          <th colspan="2"></th>
+          <th class="col-section-end" colspan="2">Sequence</th>
+          <th class="col-section-end" colspan="{% if chain_humanization.scores %}2{% else %}1{% endif %}">Confidence</th>
+          <th class="col-section-end" colspan="2">9-mers</th>
+          <th colspan="2">Observed Antibody Space</th>
+        </tr>
+        <tr>
+          <th style="width: 6em">Region</th>
+          <th style="width: 3.5em" class="col-section-end">{{ chain_humanization.parental_chain.scheme.title() }}</th>
+          <th style="width: 2.25em">Orig</th>
+          <th style="width: 2.25em" class="col-section-end">Mut</th>
+          {% if chain_humanization.scores %}
+          <th style="width: 5.5em" class="col-section-end">Score</th>
+          {% endif %}
+          <th style="width: 5.5em" class="col-section-end">Frequency</th>
+          <th style="width: 9em">Parental</th>
+          <th style="width: 9em" class="col-section-end">Humanized</th>
+          <th style="width: 12em">Subjects</th>
+          <th style="width: 14em">9-mer hits</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for position, (a, b) in chain_humanization.alignment %}
+          {% set scores = chain_humanization.scores.get(position) %}
+          {% set freqs = parental_humanness.germline_family_residue_frequency.get(position) %}
+          <tr class="{% if a == b %}not-mutated-row collapse show{% else %}mutated-row{% endif %} {{ mark_section_boundary(parental_humanness, humanized_humanness, chain_humanization.alignment.positions[loop.index-1-1]) }}">
+            <td class="text-end table-region-{{ position.get_region() }}">
+              {{ position.get_region() | upper }}{% if position.cdr_definition == 'kabat' and position.is_in_vernier() %}&nbsp;Vernier{% endif %}
+            </td>
+            <td class="col-section-end"><span class="chain-pos-anchor" id="{{ position }}">{{ position }}</span></td>
+            {% if a == b %}
+              <td colspan="2" class="text-center taylor-{{a}} opacity-60">
+                <strong title="{{ aa_name(a) }}">{{ a }}</strong>
+              </td>
+              {% if chain_humanization.scores %}
+              <td class="text-center text-secondary col-section-end"
+                   data-bs-toggle="tooltip" data-bs-html="true"
+                   title="Sapiens predicted score">
+                {{ '{:.0f}'.format(scores[b]*100) if scores and b in scores else '?' }}
+              </td>
+              {% endif %}
+              <td class="text-center text-secondary col-section-end"
+                   data-bs-toggle="tooltip" data-bs-html="true"
+                   title="{{ format_aa_frequency_tooltip(humanized_humanness.v_germline_family, b, freqs) }}">
+                {{ format_aa_frequency(freqs.get(b, 0) if freqs else none) }}
+              </td>
+            {% else %}
+              <td class="text-center taylor-{{a}}">
+                <strong title="{{ aa_name(a) }}">{{ a }}</strong>
+              </td>
+              <td class="text-center taylor-{{b}} mutation-arrow">
+                <strong title="{{ aa_name(b) }}">{{ b }}</strong>
+              </td>
+              {% if chain_humanization.scores %}
+              <td class="text-center col-section-end">
+                {{
+                '{:.0f}'.format(scores[a]*100) if scores and a in scores else '?'
+                }}&nbsp;→&nbsp;{{
+                '{:.0f}'.format(scores[b]*100) if scores and b in scores else '?'
+                }}
+              </td>
+              {% endif %}
+              <td class="text-center col-section-end"
+                   data-bs-toggle="tooltip" data-tooltip-classes="tooltip-wide" data-bs-html="true"
+                   title="{{ format_aa_frequency_tooltip(humanized_humanness.v_germline_family, b, freqs) }}">
+                {{
+                format_aa_frequency(freqs.get(a, 0) if freqs else none)
+                }}&nbsp;→&nbsp;{{
+                format_aa_frequency(freqs.get(b, 0) if freqs else none)
+                }}
+              </td>
+            {% endif %}
+            {% if parental_humanness.has_position(position) or humanized_humanness.has_position(position) %}
+              {{
+                humanness_row(
+                  parental=parental_humanness.peptides.get(position),
+                  humanized=humanized_humanness.peptides.get(position)
+                )
+              }}
+            {% endif %}
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+{% endmacro %}
+
+

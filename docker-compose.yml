@@ -1,0 +1,68 @@
+version: "3.4"
+services:
+  # Web provides the Flask backend and frontend
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: always
+    ports:
+      - "5000:5000"
+    command: flask run --host=0.0.0.0
+    depends_on:
+      - redis
+      - mongo
+    environment:
+      - FLASK_ENV=development
+      - FLASK_APP=biophi.common.web.views
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+      - SESSION_REDIS_URL=redis://redis:6379/1
+      - MONGODB_HOST=mongo
+      - HTTP_PROXY
+      - HTTPS_PROXY
+      - AUTH_ENABLED
+      - BIOPHI_CLIENT_ID
+      - BIOPHI_CLIENT_SECRET
+  # Redis provides the Redis in-memory database that serves as queue for Celery tasks
+  redis:
+    image: redis
+    ports:
+      - "6379:6379"
+  # Worker provides a Celery worker that processes tasks from the redis queue
+  worker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      - FLASK_ENV=development
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+      - MONGODB_HOST=mongo
+      - HTTP_PROXY
+      - HTTPS_PROXY
+    command: celery -A biophi.common.web.tasks.celery worker --loglevel=INFO
+    depends_on:
+      - redis
+      - mongo
+  # MongoDB provides persistent storage
+  mongo:
+    image: mongo
+    environment: 
+      - MONGO_INITDB_DATABASE=biophi
+      - HTTP_PROXY
+      - HTTPS_PROXY
+    ports:
+      - "27017:27017"
+  # Beat provides a Celery beat scheduler that schedules regular tasks
+  beat:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      - FLASK_ENV=development
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+    command: make beat-in-docker
+    depends_on:
+      - worker

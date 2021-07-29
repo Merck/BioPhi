@@ -1,0 +1,47 @@
+{% if input_bulk_example is undefined %}
+  {% set input_bulk_example = '>Muromonab-CD3 Variable light chain
+QIVLTQSPAIMSASPGEKVTMTCSASSSVSYMNWYQQKSGTSPKRWIYDTSKLASGVPAH
+FRGSGSGTSYSLTISGMEAEDAATYYCQQWSSNPFTFGSGTKLEIN
+>Muromonab-CD3 Variable heavy chain
+QVQLQQSGAELARPGASVKMSCKASGYTFTRYTMHWVKQRPGQGLEWIGYINPSRGYTNY
+NQKFKDKATLTTDKSSSTAYMQLSSLTSEDSAVYYCARYYDDHYCLDYWGQGTTLTVSS' %}
+{% endif %}
+
+<p>Provide multiple antibody sequences. Both chains of an antibody should have the same ID in the FASTA header,
+  optionally with _HC/_LC or _VH/_VL suffix.</p>
+<div class="mb-3">
+  <div class="row">
+    <div class="col-7">
+      <label for="sequence_text_input" class="form-label">Antibody sequences (FASTA)</label>
+    </div>
+    <div class="col-5 text-end">
+      <a href="#sequence_text_input" class="text-secondary text-decoration-none" data-inject-example="{{ input_bulk_example }}">
+        {{ icon('arrow-down-square-fill') }} Use example
+      </a>
+    </div>
+  </div>
+  <textarea class="form-control" id="sequence_text_input" name="sequence_text" rows="5" placeholder=">Antibody1 VH
+QVQLQ...
+>Antibody1 VL
+DIVMT...">{{ sequence_text }}</textarea>
+</div>
+<div class="mb-3">
+    <div class="row">
+      <div class="col-md-6">
+        <label for="sequence_files_input" class="form-label">Upload file (FASTA/PDB)</label><br>
+        <input class="form-control form-control-sm" type="file" id="sequence_files_input" name="sequence_files[]"
+               multiple>
+      </div>
+      <div class="col-md-6">
+        <div class="row">
+          <div class="col-5"><label for="pdb_ids" class="form-label">PDB IDs</label></div>
+          <div class="col-7 text-end">
+            <a href="#pdb_ids" class="text-secondary text-decoration-none" data-inject-example="5DK3">
+              {{ icon('arrow-down-square-fill') }} Use example
+            </a>
+          </div>
+        </div>
+        <input type="text" size="20" class="form-control form-control-sm" id="pdb_ids" name="pdb_ids">
+      </div>
+    </div>
+  </div>
