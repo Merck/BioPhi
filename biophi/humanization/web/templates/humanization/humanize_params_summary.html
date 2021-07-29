@@ -3,7 +3,7 @@
     Sapiens
     with {{ result.humanization_params.iterations }}
     {{ 'iteration' if result.humanization_params.iterations == 1 else 'iterations' }}
-    {% if result.humanize_cdrs %}
+    {% if result.humanization_params.humanize_cdrs %}
       | Humanizing CDRs ({{ result.humanization_params.cdr_definition }})
     {% else %}
       | Keeping parental CDRs ({{ result.humanization_params.cdr_definition }})
