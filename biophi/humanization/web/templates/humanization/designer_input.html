@@ -6,15 +6,15 @@
   <div id="header" style="background-position: center 30%">
     <div class="container">
       <h1 class="display-1 fw-lighter">Designer</h1>
-      <p class="lead">
-        Perform mutations on an antibody sequence while monitoring sequence properties in real time.
-      </p>
     </div>
   </div>
 {% endblock %}
 
 
 {% block main %}
+<p>
+  Perform mutations on an antibody sequence while monitoring sequence properties in real time.
+</p>
 <form id="upload" action="{{ url_for('biophi_humanization.humanize_post', designer='yes') }}"
       method="post" class="row numbered-form g-3" enctype="multipart/form-data">
   <div class="col-md-5">
