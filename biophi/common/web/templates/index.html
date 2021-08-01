@@ -55,7 +55,7 @@
             <h5 class="mb-1">{{ item.title }}</h5>
             <small>{{ item.date | humanize() }}</small>
           </div>
-          <p class="mb-1">{{ item.body }}</p>
+          <p class="mb-1">{{ item.body | safe }}</p>
         </div>
         {% endfor %}
       </div>

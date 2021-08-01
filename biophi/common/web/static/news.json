@@ -1,22 +1,7 @@
 [
   {
-    "title": "Coloring by exposure",
-    "body": "It is now possible to select \"Exposure\" coloring scheme to color by average surface exposure at given position.",
-    "date": "2021-06-21 10:11:00"
-  },
-  {
-    "title": "New Designer functionality",
-    "body": "New \"Designer\" tab was added that supports making manual mutations to an antibody sequence while monitoring sequence properties in real time.",
-    "date": "2021-06-20 11:11:00"
-  },
-  {
-    "title": "Redesign & Improved navigation",
-    "body": "New landing page was added, the left navigation panel was removed and replaced with a more streamlined top navigation bar.",
-    "date": "2021-06-19 11:11:00"
-  },
-  {
-    "title": "Help button added",
-    "body": "A help button was added to the top right of the screen. Click it to learn more about the page or to learn how to report any issues.",
-    "date": "2021-06-19 11:11:00"
+    "title": "Open-source release 1.0",
+    "body": "BioPhi was <a href=\"https://github.com/Merck/BioPhi\" target=\"_blank\">released on GitHub</a> under the MIT license.",
+    "date": "2021-07-29 20:11:00"
   }
 ]
