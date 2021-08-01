@@ -34,15 +34,15 @@
       <ul class="dropdown-menu" aria-labelledby="exportDropdown">
         <li>
           <a class="dropdown-item" target="_blank"
-               href="{{ url_for('biophi_humanization.humanize_detail_export_humanized_fasta', task_id=task_id, index=result_index) }}">FASTA</a>
+               href="{{ url_for('biophi_humanization.humanize_detail_export_humanized_fasta', task_id=task_id) }}">FASTA</a>
         </li>
         <li>
           <a class="dropdown-item" target="_blank"
-               href="{{ url_for('biophi_humanization.humanize_detail_export_alignment', task_id=task_id, index=result_index) }}">Alignment</a>
+               href="{{ url_for('biophi_humanization.humanize_detail_export_alignment', task_id=task_id) }}">Alignment</a>
         </li>
         <li>
           <a class="dropdown-item" target="_blank"
-               href="{{ url_for('biophi_humanization.humanize_detail_export_oasis_table', task_id=task_id, index=result_index) }}">OASis table</a>
+               href="{{ url_for('biophi_humanization.humanize_detail_export_oasis_table', task_id=task_id) }}">OASis table</a>
         </li>
       </ul>
     </div>

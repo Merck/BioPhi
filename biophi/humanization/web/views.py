@@ -199,8 +199,9 @@ def humanize_detail_get(task_id, index):
                            task_id=task_id, result_task_id=result_task_id, result=result, result_index=index)
 
 
-@biophi_humanization.route('/humanize/report/<task_id>/<index>/humanized.fa', methods=['GET'])
-def humanize_detail_export_humanized_fasta(task_id, index):
+@biophi_humanization.route('/humanize/report/<task_id>/humanized.fa', methods=['GET'])
+def humanize_detail_export_humanized_fasta(task_id):
+    index = request.args.get('index')
     result: HumanizeAntibodyTaskResult = scheduler.get_result(task_id, index)
     return send_fasta(
         result.get_humanized_records(),
@@ -208,8 +209,9 @@ def humanize_detail_export_humanized_fasta(task_id, index):
     )
 
 
-@biophi_humanization.route('/humanize/report/<task_id>/<index>/alignment.txt', methods=['GET'])
-def humanize_detail_export_alignment(task_id, index):
+@biophi_humanization.route('/humanize/report/<task_id>/alignment.txt', methods=['GET'])
+def humanize_detail_export_alignment(task_id):
+    index = request.args.get('index')
     result: HumanizeAntibodyTaskResult = scheduler.get_result(task_id, index)
     return send_text(
         result.humanization.get_alignment_string(),
@@ -217,8 +219,9 @@ def humanize_detail_export_alignment(task_id, index):
     )
 
 
-@biophi_humanization.route('/humanize/report/<task_id>/<index>/oasis.xls', methods=['GET'])
-def humanize_detail_export_oasis_table(task_id, index):
+@biophi_humanization.route('/humanize/report/<task_id>/oasis.xls', methods=['GET'])
+def humanize_detail_export_oasis_table(task_id):
+    index = request.args.get('index')
     result: HumanizeAntibodyTaskResult = scheduler.get_result(task_id, index)
     return send_excel(
         {
