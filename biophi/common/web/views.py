@@ -48,8 +48,8 @@ use_scheduler('celery')
 
 @app.route('/')
 def index():
-    root_path = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
-    news_path = os.path.join(root_path, 'news.json')
+    web_path = os.path.dirname(__file__)
+    news_path = os.path.join(web_path, 'static', 'news.json')
     with open(news_path) as f:
         news = json.load(f)
     for item in news:
