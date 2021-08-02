@@ -17,8 +17,8 @@ app = Flask(__name__)
 app.secret_key = 'gijo080)Q@%0h8q808th0018020ahofijvvi018a-b8n8881244o09g-fff221111ttgj09s'
 
 app.config.update(dict(
-    # Max file upload size
-    MAX_CONTENT_LENGTH=16 * 1024 * 1024,
+    # Max file upload size in bytes
+    MAX_CONTENT_LENGTH=256 * 1024,
     # Path to OASis sqlite database
     OASIS_DB_PATH=os.environ.get('OASIS_DB_PATH')
 ))
