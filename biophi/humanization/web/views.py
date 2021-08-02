@@ -231,22 +231,23 @@ def humanize_detail_export_oasis_table(task_id):
         name=result.get_export_name()
     )
 
-@biophi_humanization.route('/humanize/report/<task_id>/humanized.fa', methods=['GET'])
+
+@biophi_humanization.route('/humanize/report/batch/<task_id>/humanized.fa', methods=['GET'])
 def humanize_batch_export_humanized_fasta(task_id):
     results: List[HumanizeAntibodyTaskResult] = scheduler.get_results(task_id)
     records = [record for result in results for record in result.get_humanized_records()]
     return send_fasta(records, name=results[0].get_export_name(num_seqs=len(results)))
 
 
-@biophi_humanization.route('/humanize/report/<task_id>/alignments.txt', methods=['GET'])
+@biophi_humanization.route('/humanize/report/batch/<task_id>/alignments.txt', methods=['GET'])
 def humanize_batch_export_alignments(task_id):
     results: List[HumanizeAntibodyTaskResult] = scheduler.get_results(task_id)
     text = '\n\n'.join([result.humanization.get_alignment_string() for result in results])
-    name = results[0].input.safe_name if len(results) == 1 else results[0].get_export_name(multiple=True)
+    name = results[0].input.safe_name if len(results) == 1 else results[0].get_export_name(num_seqs=len(results))
     return send_text(text, name=name)
 
 
-@biophi_humanization.route('/humanize/report/<task_id>/sapiens.xlsx', methods=['GET'])
+@biophi_humanization.route('/humanize/report/batch/<task_id>/sapiens.xlsx', methods=['GET'])
 def humanize_batch_export_table(task_id):
     results: List[HumanizeAntibodyTaskResult] = scheduler.get_results(task_id)
     full = bool(request.args.get('full'))
