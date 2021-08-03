@@ -67,10 +67,6 @@
       <p class="lead">Max task duration</p>
       {{ barplot(task_log['running_seconds'].resample(sample_time).max().tail(sample_last)[::-1], color='warning', fmt='{:.1f} seconds') }}
    </div>
-   <div class="col-4">
-      <p class="lead">Avg task wait time</p>
-      {{ barplot(task_log['queued_seconds'].resample(sample_time).mean().tail(sample_last)[::-1], color='warning', fmt='{:.1f} seconds') }}
-   </div>
 </div>
 <div class="row mb-5">
    <div class="col-3">

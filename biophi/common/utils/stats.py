@@ -42,12 +42,11 @@ def log_submission(antibody_inputs, invalid_names, duplicate_names, unrecognized
     )
 
 
-def log_task_result(queued_seconds=None, running_seconds=None, exception=None):
+def log_task_result(running_seconds=None, exception=None):
     if not current_app.config['STATS_DB_PATH']:
         return
     log_data(
         data=dict(
-            queued_seconds=queued_seconds,
             running_seconds=running_seconds,
             exception=str(exception) if exception else None
         ),

@@ -38,10 +38,9 @@ def update_running_state(task_id, task, **kwargs):
 @task_postrun.connect
 def log_task_postrun(task_id, task, **kwargs):
     from biophi.common.web.views import app
-    queued_seconds = 0
     running_seconds = time.time() - task.start_time
     with app.app_context():
-        log_task_result(queued_seconds=queued_seconds, running_seconds=running_seconds)
+        log_task_result(running_seconds=running_seconds)
 
 
 @task_failure.connect
