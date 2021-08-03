@@ -74,7 +74,7 @@ def log_data(data, table):
         request_data = dict(
             referer=request.headers.get('Referer'),
             browser_hash=hashlib.md5(
-                '{}_{}'.format(request.headers.get('User-Agent'), request.remote_addr).encode()
+                '{}_{}'.format(request.headers.get('User-Agent'), ip).encode()
             ).hexdigest(),
             ip=ip,
             endpoint_name=request.endpoint.split('.')[-1] if request.endpoint else None
