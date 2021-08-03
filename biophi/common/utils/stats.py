@@ -70,12 +70,13 @@ def log_access(exception=None):
 def log_data(data, table):
     e = get_engine()
     try:
+        ip = request.headers.get('X-Forwarded-For', request.remote_addr)
         request_data = dict(
             referer=request.headers.get('Referer'),
             browser_hash=hashlib.md5(
                 '{}_{}'.format(request.headers.get('User-Agent'), request.remote_addr).encode()
             ).hexdigest(),
-            ip=request.remote_addr,
+            ip=ip,
             endpoint_name=request.endpoint.split('.')[-1] if request.endpoint else None
         )
     except RuntimeError:
