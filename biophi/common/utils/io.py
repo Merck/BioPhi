@@ -8,7 +8,7 @@ from Bio.PDB.Chain import Chain as BioPdbChain
 from Bio.PDB.Model import Model
 from Bio.SeqUtils import seq1
 from abnumber import Chain as AbNumberChain, ChainParseError
-from flask import abort, jsonify, make_response, send_file, request, flash
+from flask import send_file, request, flash, current_app
 from dataclasses import dataclass
 from werkzeug.datastructures import FileStorage
 import pandas as pd
@@ -19,6 +19,7 @@ from biophi.common.utils.seq import looks_like_antibody_heavy_chain, download_pd
     looks_like_dna, is_valid_amino_acid_sequence
 import os
 from biophi.common.utils.seq import sanitize_sequence
+from biophi.common.utils.stats import log_submission
 
 
 @dataclass
@@ -122,12 +123,26 @@ def read_antibody_input_request():
             heavy_protein_seq=vh,
             light_protein_seq=vl
         )
+
+        log_submission(
+            antibody_inputs=[input],
+            invalid_names=[],
+            duplicate_names=[],
+            unrecognized_files=[]
+        )
         return [input]
 
     antibody_inputs, invalid_names, duplicate_names, unrecognized_files = parse_antibody_inputs(
         seq_string=request.form['sequence_text'],
         pdb_ids=[pdb_id.strip() for pdb_id in request.form['pdb_ids'].replace(',', ' ').split() if pdb_id.strip()],
         files=request.files.getlist("sequence_files[]")
+    )
+
+    log_submission(
+        antibody_inputs=antibody_inputs,
+        invalid_names=invalid_names,
+        duplicate_names=duplicate_names,
+        unrecognized_files=unrecognized_files
     )
 
     if invalid_names:
@@ -142,6 +157,11 @@ def read_antibody_input_request():
     if not antibody_inputs:
         flash('No input sequences were provided')
         return redirect(request.url)
+
+    max_inputs = current_app.config['MAX_INPUTS']
+    if len(antibody_inputs) > max_inputs:
+        flash(f'Maximum number of input sequences exceeded, processed only the first {max_inputs} inputs')
+        antibody_inputs = antibody_inputs[:max_inputs]
 
     return antibody_inputs
 

@@ -96,6 +96,7 @@ def humanize_get():
 @biophi_humanization.route('/humanize/', methods=['POST'])
 def humanize_post():
     antibody_inputs = read_antibody_input_request()
+
     if isinstance(antibody_inputs, Response):
         return antibody_inputs
 
@@ -158,10 +159,11 @@ def humanize_results_get(task_id):
     limit = int(request.args.get('limit', 10))
 
     if not scheduler.are_results_ready(task_id):
-        completed, total = scheduler.get_results_progress(task_id)
+        running, completed, total = scheduler.get_results_progress(task_id)
         return render_template(
             'loading.html',
             active_nav='humanize',
+            running=running,
             completed=completed,
             total=total
         )
@@ -342,10 +344,11 @@ def humanness_report_table_get(task_id):
     limit = int(request.args.get('limit', 10))
 
     if not scheduler.are_results_ready(task_id):
-        completed, total = scheduler.get_results_progress(task_id)
+        running, completed, total = scheduler.get_results_progress(task_id)
         return render_template(
             'loading.html',
             active_nav='humanness',
+            running=running,
             completed=completed,
             total=total
         )

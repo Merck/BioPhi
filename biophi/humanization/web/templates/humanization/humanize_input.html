@@ -14,15 +14,23 @@
   Humanize an antibody using deep learning on natural antibody repertoires (Sapiens) or CDR grafting.
 </p>
 <form id="upload" method="post" class="row numbered-form g-3" enctype="multipart/form-data">
-  <div class="col-md-5">
+  <div class="col-md-7">
     <h4 class="numbered-header mt-2 mb-3"><span class="badge bg-primary">1</span>Input sequences</h4>
     {% include 'antibody_input_component.html' %}
   </div>
-  <div class="col-md-7">
-    <h4 class="numbered-header mt-2 mb-3"><span class="badge bg-primary">2</span>Settings</h4>
-    {% include 'humanization/humanness_settings_component.html' %}
+  <div class="col-md-10">
+    <h4 class="numbered-header mt-2 mb-3"><span class="badge bg-primary">2</span>Humanization settings</h4>
+    {% include 'numbering_component.html' %}
     {% include 'humanization/humanize_settings_component.html' %}
-    <input type="submit" name="submit" class="btn btn-primary btn-lg" value="Humanize">
+  </div>
+  <div class="col-md-10">
+    <h4 class="numbered-header mt-2 mb-3"><span class="badge bg-primary">3</span>Humanness evaluation settings</h4>
+    {% include 'humanization/humanness_settings_component.html' %}
+  </div>
+  <div class="col-md-10">
+    <h4 class="numbered-header mt-2 mb-3"><span class="badge bg-primary">4</span>Submit</h4>
+    <p>Submit the task to the queue. Results are stored for a 24-hour period and accessible under a secret URL.</p>
+    <input type="submit" name="submit" class="btn btn-primary btn-lg" value="Submit">
   </div>
 
 </form>

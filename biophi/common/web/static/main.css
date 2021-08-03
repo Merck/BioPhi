@@ -60,6 +60,10 @@
     cursor: pointer !important;
 }
 
+#footer {
+    margin-top: 100px;
+}
+
 #news .list-group-item {
     padding-left: 0;
 }

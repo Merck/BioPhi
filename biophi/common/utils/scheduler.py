@@ -1,3 +1,5 @@
+from typing import Tuple
+
 from celery import group
 from abc import ABC, abstractmethod
 from biophi.common.web.tasks import celery
@@ -26,7 +28,7 @@ class Scheduler(ABC):
         pass
 
     @abstractmethod
-    def get_results_progress(self, task_id):
+    def get_results_progress(self, task_id) -> Tuple[int, int, int]:
         pass
 
     @abstractmethod
@@ -66,9 +68,10 @@ class CeleryScheduler(Scheduler):
     def are_results_ready(self, task_id):
         return self.get_celery_group_result(task_id).ready()
 
-    def get_results_progress(self, task_id):
+    def get_results_progress(self, task_id) -> Tuple[int, int, int]:
         group_result = self.get_celery_group_result(task_id)
-        return group_result.completed_count(), len(group_result)
+        num_running = sum(r.state == 'RUNNING' for r in group_result)
+        return num_running, group_result.completed_count(), len(group_result)
 
     def schedule_task(self, fun, *args, **kwargs):
         async_result = fun.delay(*args, **kwargs)
@@ -109,8 +112,9 @@ class SimpleInMemoryScheduler(Scheduler):
     def are_results_ready(self, task_id):
         return task_id in self.results
 
-    def get_results_progress(self, task_id):
-        return None, None
+    def get_results_progress(self, task_id) -> Tuple[int, int, int]:
+        # This should never be called because tasks are always ready
+        raise NotImplementedError()
 
     def schedule_task(self, fun, *args, **kwargs):
         return self.save_result(fun(*args, **kwargs))

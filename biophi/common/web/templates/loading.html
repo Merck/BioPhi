@@ -18,12 +18,22 @@
         <div class="col-6">
             <div class="progress">
                 {% if total and total > 1 %}
-                <div class="progress-bar bg-info" role="progressbar" style="width: {{ completed / total * 100}}%;">
-                    {{ '{:.0%}'.format(completed / total) }}
+                  {% if completed > 0 %}
+                    <div class="progress-bar bg-success progress-bar-striped progress-bar-animated" role="progressbar" style="width: {{ completed / total * 100}}%;">
+                        {{ completed }} / {{ total }}
+                    </div>
+                  {% else %}
+                    <div class="progress-bar bg-info" role="progressbar" style="width: 100%;">
+                        Tasks are waiting in queue...
+                    </div>
+                  {% endif %}
+                {% elif running %}
+                <div class="progress-bar progress-bar-striped bg-success progress-bar-animated" role="progressbar" style="width: 100%">
+                    Task is in progress...
                 </div>
                 {% else %}
-                <div class="progress-bar progress-bar-striped bg-info progress-bar-animated" role="progressbar" style="width: 100%">
-                    Task in progress...
+                <div class="progress-bar bg-info" role="progressbar" style="width: 100%">
+                    Task is waiting in queue...
                 </div>
                 {% endif %}
             </div>

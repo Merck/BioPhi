@@ -2,6 +2,7 @@
     <div class="d-inline-block me-3">
       <label class="form-label" for="scheme_input">
         Numbering
+        {{ info_icon('ANARCI numbering scheme used to align the sequence and annotate position numbers') }}
       </label>
       <select class="form-select form-select-sm" style="width: 150px;" id="scheme_input" name="scheme">
         <option value="kabat" {% if scheme == 'kabat' %}selected{% endif %}>Kabat</option>
@@ -13,6 +14,7 @@
     <div class="d-inline-block">
       <label class="form-label" for="cdr_definition_input">
         CDR Definition
+        {{ info_icon('Scheme used to define the CDR regions') }}
       </label>
       <select class="form-select form-select-sm" style="width: 150px;" id="cdr_definition_input" name="cdr_definition">
         <option value="kabat" {% if cdr_definition == 'kabat' %}selected{% endif %}>Kabat</option>

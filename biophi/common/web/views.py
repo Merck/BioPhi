@@ -3,13 +3,13 @@ import json
 from Bio.SeqUtils import seq3
 from flask_humanize import Humanize
 import pandas as pd
+from markupsafe import Markup
 from werkzeug.urls import url_encode
 from biophi.common.utils.formatting import aa_name
-from flask import Flask, url_for, request, render_template, redirect
-from jinja2 import Markup
+from flask import Flask, url_for, request, render_template
 import os
-
 from biophi.common.utils.scheduler import use_scheduler, TaskNotFoundError
+from biophi.common.utils.stats import get_stats, log_access
 from biophi.humanization.web.views import biophi_humanization
 
 app = Flask(__name__)
@@ -18,9 +18,16 @@ app.secret_key = 'gijo080)Q@%0h8q808th0018020ahofijvvi018a-b8n8881244o09g-fff221
 
 app.config.update(dict(
     # Max file upload size in bytes
-    MAX_CONTENT_LENGTH=256 * 1024,
+    MAX_CONTENT_LENGTH=int(os.environ.get('MAX_CONTENT_LENGTH', 1 * 1024 * 1024)),
+    # Maximum number of input antibodies to be processed
+    MAX_INPUTS=int(os.environ.get('MAX_INPUTS', 5000)),
+    # Path to BioPhi usage statistics sqlite database
+    STATS_DB_PATH=os.environ.get('STATS_DB_PATH'),
     # Path to OASis sqlite database
-    OASIS_DB_PATH=os.environ.get('OASIS_DB_PATH')
+    OASIS_DB_PATH=os.environ.get('OASIS_DB_PATH'),
+    # Destroy context on exception even in Debug mode, so that we can log the exception to the stats DB
+    # This makes sure that teardown_request is called in debug mode when getting an exception in the endpoint
+    PRESERVE_CONTEXT_ON_EXCEPTION=False
 ))
 
 app.jinja_env.globals.update(aa_name=aa_name)
@@ -45,17 +52,18 @@ app.register_blueprint(biophi_humanization, url_prefix='/humanization')
 
 use_scheduler('celery')
 
+#
+# Configure handlers
+#
 
-@app.route('/')
-def index():
-    web_path = os.path.dirname(__file__)
-    news_path = os.path.join(web_path, 'static', 'news.json')
-    with open(news_path) as f:
-        news = json.load(f)
-    for item in news:
-        item['date'] = datetime.datetime.fromisoformat(item['date'])
-    oasis_enabled = app.config['OASIS_DB_PATH'] is not None
-    return render_template('index.html', total=1, news=news, oasis_enabled=oasis_enabled)
+if app.config['STATS_DB_PATH']:
+    @app.teardown_request
+    def teardown_request_log_stats(exception):
+        if request.endpoint and 'static' in request.endpoint:
+            return
+        if request.endpoint in ['stats']:
+            return
+        log_access(exception=exception)
 
 
 @app.errorhandler(404)
@@ -74,6 +82,36 @@ def error_task_not_found(e):
     return render_template('error_task_not_found.html'), 404
 
 #
+# Define basic endpoints
+#
+
+
+@app.route('/')
+def index():
+    web_path = os.path.dirname(__file__)
+    news_path = os.path.join(web_path, 'static', 'news.json')
+    with open(news_path) as f:
+        news = json.load(f)
+    for item in news:
+        item['date'] = datetime.datetime.fromisoformat(item['date'])
+    oasis_enabled = app.config['OASIS_DB_PATH'] is not None
+    return render_template('index.html', total=1, news=news, oasis_enabled=oasis_enabled)
+
+
+@app.route('/stats')
+def stats():
+    if not app.config['STATS_DB_PATH']:
+        raise ValueError('Set STATS_DB_PATH env var to enable stats')
+    past_days = 7
+    return render_template(
+        'stats.html',
+        access_log=get_stats('access_log', past_days=past_days),
+        submission_log=get_stats('submission_log', past_days=past_days),
+        task_log=get_stats('task_log', past_days=past_days),
+        pd=pd
+    )
+
+#
 # Define template functions and filters
 #
 
@@ -81,6 +119,11 @@ def error_task_not_found(e):
 def icon(name, s=16):
     href = url_for('static', filename='bootstrap-icons-1.0.0/bootstrap-icons.svg')
     return Markup(f'<svg class="bi" width="{s}" height="{s}" fill="currentColor"><use xlink:href="{href}#{name}"/></svg>')
+
+
+@app.template_global()
+def info_icon(text):
+    return Markup(f'<span data-tooltip-classes="tooltip-wide" data-bs-toggle="tooltip" title="{text}">{icon("info-circle-fill")}</span>')
 
 
 @app.template_global()

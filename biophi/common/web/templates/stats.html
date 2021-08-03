@@ -1,0 +1,126 @@
+{% extends "layout.html" %}
+{% set title = "Usage stats" %}
+
+
+{% block header %}
+{% endblock %}
+
+{% set sample_time = '1H' %}
+{% set sample_last = 24 %}
+
+{% block container %}
+
+<div class="container">
+    <div class="row mt-5">
+      <div class="col-12">
+        <h2>Past week</h2>
+        {{ stats('1D', 7) }}
+        <h2>Past 24 hours</h2>
+        {{ stats('1h', 24) }}
+      </div>
+    </div>
+</div>
+{% endblock %}
+
+
+{% macro stats(sample_time, sample_last) %}
+{% set access_log_trimmed = access_log[pd.Timestamp.now() - pd.Timedelta(sample_time) * sample_last:pd.Timestamp.now()] %}
+{% set submission_log_trimmed = submission_log[pd.Timestamp.now() - pd.Timedelta(sample_time) * sample_last:pd.Timestamp.now()] %}
+<div class="row mb-5">
+    <div class="col-4">
+      <p class="lead">Page hits</p>
+      {{ barplot(access_log['browser_hash'].resample(sample_time).count().tail(sample_last)[::-1], color='primary') }}
+    </div>
+   <div class="col-4">
+      <p class="lead">Estimated unique visitors</p>
+      {{ barplot(access_log['browser_hash'].resample(sample_time).nunique().tail(sample_last)[::-1]) }}
+   </div>
+   <div class="col-4">
+      <p class="lead">Unique page visits</p>
+      {{ barplot(access_log_trimmed.groupby('endpoint_name')['browser_hash'].nunique()) }}
+   </div>
+</div>
+<div class="row mb-5">
+    <div class="col-3">
+      <p class="lead">Total submissions</p>
+      {{ barplot(submission_log['num_inputs'].resample(sample_time).count().tail(sample_last)[::-1], color='primary', key_width=5) }}
+    </div>
+   <div class="col-3">
+      <p class="lead">Total sequences</p>
+      {{ barplot(submission_log['num_inputs'].resample(sample_time).sum().tail(sample_last)[::-1], color='primary', key_width=5) }}
+   </div>
+   <div class="col-3">
+      <p class="lead">Unique submissions</p>
+      {{ barplot(submission_log['input_hash'].resample(sample_time).nunique().tail(sample_last)[::-1], key_width=5) }}
+   </div>
+   <div class="col-3">
+      <p class="lead">Unique submissions by page</p>
+      {{ barplot(submission_log_trimmed.groupby('endpoint_name')['browser_hash'].nunique()) }}
+   </div>
+</div>
+<div class="row mb-5">
+   <div class="col-4">
+      <p class="lead">Avg task duration</p>
+      {{ barplot(task_log['running_seconds'].resample(sample_time).mean().tail(sample_last)[::-1], color='warning', fmt='{:.1f} seconds') }}
+   </div>
+   <div class="col-4">
+      <p class="lead">Max task duration</p>
+      {{ barplot(task_log['running_seconds'].resample(sample_time).max().tail(sample_last)[::-1], color='warning', fmt='{:.1f} seconds') }}
+   </div>
+   <div class="col-4">
+      <p class="lead">Avg task wait time</p>
+      {{ barplot(task_log['queued_seconds'].resample(sample_time).mean().tail(sample_last)[::-1], color='warning', fmt='{:.1f} seconds') }}
+   </div>
+</div>
+<div class="row mb-5">
+   <div class="col-3">
+      <p class="lead">Request errors</p>
+      {{ barplot(access_log['exception'].dropna().resample(sample_time).count().tail(sample_last)[::-1], color='danger', key_width=5) }}
+    </div>
+   <div class="col-4">
+      <p class="lead">Last request errors</p>
+      {% for i, row in access_log[access_log['exception'].isna() == False][::-1].head().iterrows() %}
+        <div class="text-danger fs-smaller">{{ row.name | humanize() }}: {{ row['exception'][:50] + ('...' if (row['exception'] | length) > 50 else '') }}</div>
+      {% endfor %}
+   </div>
+   <div class="col-5">
+      <p class="lead">Common request errors</p>
+       {{ barplot(access_log['exception'].str.slice(0, 50).value_counts(), key_width=10, color='danger') }}
+   </div>
+</div>
+<div class="row mb-5">
+   <div class="col-3">
+      <p class="lead">Task errors</p>
+      {{ barplot(task_log['exception'].dropna().resample(sample_time).count().tail(sample_last)[::-1], color='danger', key_width=5) }}
+    </div>
+   <div class="col-4">
+      <p class="lead">Last task errors</p>
+      {% for i, row in task_log[task_log['exception'].isna() == False][::-1].head().iterrows() %}
+        <div class="text-danger fs-smaller">{{ row.name | humanize() }}: {{ row['exception'][:50] + ('...' if (row['exception'] | length) > 50 else '') }}</div>
+      {% endfor %}
+   </div>
+   <div class="col-5">
+      <p class="lead">Common task errors</p>
+       {{ barplot(task_log['exception'].str.slice(0, 50).value_counts(), key_width=10, color='danger') }}
+   </div>
+</div>
+{% endmacro %}
+
+{% macro barplot(series, key_width=4, color='success', fmt='{}') %}
+  <div>
+    {% for key, value in series.items() %}
+    <div class="row g-2">
+      <div class="col-{{ 12 - key_width }}">
+        <div class="progress">
+          <div class="progress-bar bg-{{color}}" style="width: {{ '{:.1%}'.format(value / series.max()) }}">
+            {{ fmt.format(value) }}
+          </div>
+        </div>
+      </div>
+      <div class="col-{{ key_width }} fs-smaller">
+        {{ key | humanize() }}
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+{% endmacro %}
