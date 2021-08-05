@@ -26,6 +26,7 @@ class SapiensHumanizationParams(HumanizationParams):
     method = 'sapiens'
     model_version: str = 'latest'
     humanize_cdrs: bool = False
+    backmutate_vernier: bool = False
     iterations: int = 1
 
     def get_export_name(self):
@@ -75,9 +76,14 @@ class HumanizedResidueAnnot:
 
 @dataclass
 class ChainHumanization:
+    # Chain object containing the parental sequence
     parental_chain: Chain
+    # Chain object containing the humanized sequence
     humanized_chain: Chain
+    # Scores predicted from last parental sequence, can be used to explain the prediction
     scores: Dict[Position, Dict[str, float]]
+    # Scores predicted from last humanized sequence, can be used to propose next mutations
+    next_scores: Dict[Position, Dict[str, float]]
 
     @cached_property
     def alignment(self) -> Alignment:
@@ -90,11 +96,12 @@ class ChainHumanization:
         chain_label = 'VH' if self.parental_chain.is_heavy_chain() else 'VL'
         return f'{self.parental_chain.name} {chain_label}\n{self.alignment}'
 
-    def get_top_scores(self, n):
+    def get_top_scores(self, n, next=False):
+        scores = self.next_scores if next else self.scores
         top_scores = []
         for i in range(n):
             top_n_scores = []
-            for pos, aa_scores in self.scores.items():
+            for pos, aa_scores in scores.items():
                 aa, score = sorted(aa_scores.items(), key=lambda d: -d[1])[i]
                 top_n_scores.append((pos, aa, score))
             top_scores.append(top_n_scores)
@@ -181,7 +188,10 @@ def cdr_grafting_humanize_chain(parental_chain: Chain, params: CDRGraftingHumani
     # Compute Sapiens scores (used for Designer and final Sapiens pass if enabled)
     sapiens_humanization = sapiens_humanize_chain(
         humanized_chain,
-        params=SapiensHumanizationParams(iterations=params.sapiens_iterations)
+        params=SapiensHumanizationParams(
+            iterations=params.sapiens_iterations,
+            backmutate_vernier=params.backmutate_vernier
+        )
     )
     if params.sapiens_iterations:
         humanized_chain = sapiens_humanization.humanized_chain
@@ -189,17 +199,20 @@ def cdr_grafting_humanize_chain(parental_chain: Chain, params: CDRGraftingHumani
     return ChainHumanization(
         parental_chain=parental_chain,
         humanized_chain=humanized_chain,
-        scores=sapiens_humanization.scores
+        scores=sapiens_humanization.scores,
+        next_scores=sapiens_humanization.next_scores
     )
 
 
 def sapiens_humanize_chain(parental_chain: Chain, params: SapiensHumanizationParams) -> ChainHumanization:
     # Repeat Sapiens multiple times if requested, we start with the parental chain
     humanized_chain = parental_chain.clone()
-    # Get Sapiens scores as a positions (rows) by amino acids (columns) matrix
-    pred = sapiens_predict_chain(humanized_chain, model_version=params.model_version)
 
+    pred = None
     for iteration in range(params.iterations):
+        # Get Sapiens scores as a positions (rows) by amino acids (columns) matrix
+        pred = sapiens_predict_chain(humanized_chain, model_version=params.model_version)
+
         # Create humanized sequence by taking the amino acid with highest score at each position
         humanized_seq = ''.join(pred.idxmax(axis=1).values)
 
@@ -210,13 +223,24 @@ def sapiens_humanize_chain(parental_chain: Chain, params: SapiensHumanizationPar
 
         # Graft parental CDRs into the humanized sequence, unless humanizing CDRs as well
         if not params.humanize_cdrs:
-            humanized_chain = parental_chain.graft_cdrs_onto(humanized_chain)
+            humanized_chain = parental_chain.graft_cdrs_onto(
+                humanized_chain,
+                backmutate_vernier=params.backmutate_vernier
+            )
+        else:
+            if params.backmutate_vernier:
+                raise ValueError('Cannot backmutate Vernier regions when humanizing CDRs')
 
-        # Get Sapiens scores as a positions (rows) by amino acids (columns) matrix
-        pred = sapiens_predict_chain(humanized_chain, model_version=params.model_version)
+    if pred is None:
+        # Support case with 0 iterations, still return probabilities
+        pred = sapiens_predict_chain(parental_chain, model_version=params.model_version)
+
+    # Predict scores of potential next mutation from the final humanized sequence
+    pred_next = sapiens_predict_chain(humanized_chain, model_version=params.model_version)
 
     return ChainHumanization(
         parental_chain=parental_chain,
         humanized_chain=humanized_chain,
-        scores={pos: row.to_dict() for pos, (i, row) in zip(humanized_chain.positions, pred.iterrows())}
+        scores={pos: row.to_dict() for pos, (i, row) in zip(humanized_chain.positions, pred.iterrows())},
+        next_scores={pos: row.to_dict() for pos, (i, row) in zip(humanized_chain.positions, pred_next.iterrows())},
     )

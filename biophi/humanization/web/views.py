@@ -101,7 +101,13 @@ def humanize_post():
         return antibody_inputs
 
     scheme = request.form['scheme']
-    cdr_definition = request.form['cdr_definition']
+    humanizing_cdr_definition = request.form['cdr_definition']
+    if humanizing_cdr_definition == 'kabat_vernier':
+        cdr_definition = 'kabat'
+        backmutate_vernier = True
+    else:
+        cdr_definition = humanizing_cdr_definition
+        backmutate_vernier = False
 
     method = request.form.get('method', 'manual')
     if method == 'manual':
@@ -112,6 +118,7 @@ def humanize_post():
         humanization_params = SapiensHumanizationParams(
             scheme=scheme,
             cdr_definition=cdr_definition,
+            backmutate_vernier=backmutate_vernier,
             humanize_cdrs='humanize_cdrs' in request.form,
             model_version='latest',
             iterations=iterations
@@ -120,9 +127,9 @@ def humanize_post():
         humanization_params = CDRGraftingHumanizationParams(
             scheme=scheme,
             cdr_definition=cdr_definition,
+            backmutate_vernier=backmutate_vernier,
             heavy_v_germline=request.form['heavy_v_germline'],
             light_v_germline=request.form['light_v_germline'],
-            backmutate_vernier=('cdr_grafting_backmutate_vernier' in request.form),
             sapiens_iterations=(1 if 'sapiens_final_pass' in request.form else 0)
         )
     else:

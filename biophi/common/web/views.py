@@ -122,8 +122,10 @@ def icon(name, s=16):
 
 
 @app.template_global()
-def info_icon(text):
-    return Markup(f'<span data-tooltip-classes="tooltip-wide" data-bs-toggle="tooltip" title="{text}">{icon("info-circle-fill")}</span>')
+def info_icon(text, filled=False, secondary=True, delay=100, s=16):
+    name = 'info-circle-fill' if filled else 'info-circle'
+    return Markup(f'<span class="{"text-secondary" if secondary else ""}" data-tooltip-classes="tooltip-wide" '
+                  f'data-bs-delay="{delay}" data-bs-toggle="tooltip" title="{text}">{icon(name, s=s)}</span>')
 
 
 @app.template_global()

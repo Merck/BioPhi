@@ -14,10 +14,14 @@
     <div class="d-inline-block">
       <label class="form-label" for="cdr_definition_input">
         CDR Definition
-        {{ info_icon('Scheme used to define the CDR regions') }}
+        {{ info_icon('Scheme used to define the CDR regions. ' + ('Given regions are not humanized, the parental sequence is preserved.' if humanizing else '')) }}
       </label>
-      <select class="form-select form-select-sm" style="width: 150px;" id="cdr_definition_input" name="cdr_definition">
+      <select class="form-select form-select-sm" style="width: 150px;"
+              id="cdr_definition_input" name="cdr_definition">
         <option value="kabat" {% if cdr_definition == 'kabat' %}selected{% endif %}>Kabat</option>
+        {% if humanizing %}
+          <option value="kabat_vernier" {% if cdr_definition == 'kabat_vernier' %}selected{% endif %}>Kabat + Vernier</option>
+        {% endif %}
         <option value="chothia" {% if cdr_definition == 'chothia' %}selected{% endif %}>Chothia</option>
         <option value="imgt" {% if cdr_definition == 'imgt' %}selected{% endif %}>IMGT</option>
         <option value="north" {% if cdr_definition == 'north' %}selected{% endif %}>North</option>

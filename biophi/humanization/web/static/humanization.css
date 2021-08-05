@@ -88,11 +88,19 @@
     position: relative;
 }
 
+.designer-line a:not([href]) {
+    cursor: default;
+}
+
+.designer-line a:not([href]) {
+    cursor: default;
+}
+
 .designer-line:not(.designer-parental-line) a:not(:hover):not(.aa-match) {
     background: white !important;
 }
 
-.designer-line a:hover, .designer-line.designer-result-line span:hover, .designer-line .active {
+.designer-line a[href]:hover, .designer-line.designer-result-line span:hover, .designer-line .active {
     margin: -2px -2px;
     font-size: 16px;
     line-height: 24px;

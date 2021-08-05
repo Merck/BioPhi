@@ -13,7 +13,7 @@
         <label class="form-check-label" for="min_subjects_{{ label }}">{{ label }} ({{ '≥{:.0%} subjects'.format(threshold) }})</label>
       </div>
     {% endfor %}
-    <div class="form-check d-inline-block me-3">
+    <div class="form-check d-inline-block me-1">
       <input data-radio-enable="#min_subjects" class="form-check-input" type="radio" name="min_subjects" value="custom" id="min_subjects_custom">
       <label class="form-check-label" for="min_subjects_custom">custom</label>
     </div>

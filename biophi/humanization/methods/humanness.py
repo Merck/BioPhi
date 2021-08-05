@@ -65,6 +65,7 @@ class ChainHumanness:
     v_germline_names: List[str]
     j_germline_names: List[str]
     v_germline_family: str
+    v_germline_suffix: str
     germline_family_residue_frequency: Dict[Position, Dict[str, float]]
     chain_type_residue_frequency: Dict[Position, Dict[str, float]]
 
@@ -128,18 +129,17 @@ class ChainHumanness:
         assert len(set(lengths)) == 1, f'Peptides should have same lengths, got: {set(lengths)}'
         return lengths[0]
 
-    def get_positional_humanness(self, min_fraction_subjects) -> List[Tuple[Position, str, int]]:
+    def get_positional_humanness(self, min_fraction_subjects) -> List[Tuple[Position, str, List[PeptideHumanness]]]:
         chain_positions = list(self.chain.positions)
-        chain_len = len(self.chain)
         peptide_len = self.get_peptide_length()
         assert peptide_len % 2 == 1, 'Peptide needs to have odd length'
-        half = int((peptide_len - 1) / 2)
         annots = []
         for raw_pos, (pos, aa) in enumerate(self.chain):
-            window = [chain_positions[i] for i in range(max(0, raw_pos-half), min(chain_len, raw_pos+half+1))]
-            num_non_human = sum(not self.peptides[peptide_pos].is_human(min_fraction_subjects)
-                         for peptide_pos in window if peptide_pos in self.peptides)
-            annots.append((pos, aa, num_non_human))
+            window = [chain_positions[i] for i in range(max(0, raw_pos-peptide_len+1), raw_pos+1)]
+            peptides = [self.peptides[peptide_pos]
+                         for peptide_pos in window if peptide_pos in self.peptides]
+            non_human_peptides = [p for p in peptides if not p.is_human(min_fraction_subjects)]
+            annots.append((pos, aa, non_human_peptides))
         return annots
 
     def to_peptide_dataframe(self) -> pd.DataFrame:
@@ -250,7 +250,7 @@ class AntibodyHumanness:
         if self.vl:
             num_germline_residues += self.vl.num_germline_residues
             num_total_residues += len(self.vl.chain)
-        if num_total_residues is 0:
+        if num_total_residues == 0:
             return None
         return num_germline_residues / num_total_residues
 
@@ -266,9 +266,8 @@ def chop_seq_peptides(seq: Union[SeqRecord, Chain], peptide_length):
         seq = ''.join(seq.positions.values())
     else:
         raise ValueError(f'Unsupported sequence type: {type(seq)}')
-    left = int(peptide_length/2)
-    right = int(np.ceil(peptide_length/2))
-    return [(positions[center], seq[center - left:center + right]) for center in range(left, len(seq) - right + 1)]
+
+    return [(pos, seq[i:i + peptide_length]) for i, pos in enumerate(positions[:-peptide_length+1])]
 
 
 def get_antibody_humanness(vh: Optional[Chain], vl: Optional[Chain], params: OASisParams) -> AntibodyHumanness:
@@ -288,6 +287,12 @@ def get_chain_oasis_peptides(chain, params: OASisParams):
                     fraction_oas_subjects=None,
                     num_oas_occurrences=None
                 ) for pos, peptide in pos_peptides}
+
+    if params.oasis_db_path.endswith('.gz'):
+        raise ValueError('The OASis DB file needs to be unzipped (use "gunzip DB_PATH.db.gz")')
+
+    if not os.path.exists(params.oasis_db_path):
+        raise FileNotFoundError(f'The OASis DB path does not exist: {params.oasis_db_path}')
 
     oas_engine = create_engine('sqlite:///' + os.path.abspath(params.oasis_db_path), echo=False)
 
@@ -323,6 +328,7 @@ def get_chain_humanness(chain: Chain, params: OASisParams) -> ChainHumanness:
                                     for pos, aa in imgt_chain)
 
     v_germline_family = top_v.name.split('-')[0].split('/')[0]
+    v_germline_suffix = top_v.name.replace(v_germline_family, '')
     return ChainHumanness(
         chain=chain,
         imgt_chain=imgt_chain,
@@ -331,6 +337,7 @@ def get_chain_humanness(chain: Chain, params: OASisParams) -> ChainHumanness:
         j_germline_names=[chain.name for chain in j_germline_chains],
         peptides=peptides,
         v_germline_family=v_germline_family,
+        v_germline_suffix=v_germline_suffix,
         germline_family_residue_frequency=get_germline_family_residue_frequency(chain, imgt_chain, v_germline_family),
         chain_type_residue_frequency=get_chain_type_residue_frequency(chain, imgt_chain)
     )

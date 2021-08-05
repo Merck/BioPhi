@@ -17,10 +17,52 @@ if freq is none %}?{% else %}{{
 
 {% macro format_percent_subjects(freq) %}{%
 if freq is none %}?{%
-elif freq >= 0.01 or freq == 0 %}{{ '{:.0%}'.format(freq | round(2, 'floor'))  }}{%
+elif freq == 0 %}0{%
+elif freq >= 0.01 %}{{ '{:.0%}'.format(freq | round(2, 'floor'))  }}{%
 else %}{{ '{:.1%}'.format(freq | round(3, 'floor')) }}{%
 endif %}{%
 endmacro %}
+
+
+{% macro chain_humanness_header(chain_humanness, min_subj) %}
+<span class="badge fs-6 text-dark fw-light">
+  {{ '{:.0%}'.format(chain_humanness.get_oasis_identity(min_subj)) }} OASis identity
+
+  | <span class="badge fw-normal fs-smaller bg-spectral{{ '{:.0f}'.format(chain_humanness.get_oasis_percentile(min_subj)*100) }}">
+    {{ '{:.0%}'.format(chain_humanness.get_oasis_percentile(min_subj)) }}
+  </span> OASis percentile
+  | {{ '{:.0%}'.format(chain_humanness.get_germline_content()) }} germline content
+</span>
+{% endmacro %}
+
+{% macro format_sequence_tooltip(v_germline_family, pos, aa, freqs, non_human_peptides, peptide) %}
+
+  {% if freqs %}
+    {% if freqs.get(aa, 0) < RARE_FAMILY_FREQUENCY %}
+      {{ aa_name(aa) }} is a rare residue at {{ pos.scheme.title() }} {{ pos }}<br>
+      ({{ format_aa_frequency(freqs.get(aa, 0)) }} frequency in repertoires of {{ v_germline_family }})<br><br>
+    {% endif %}
+  {% else %}
+    Frequency for {{ v_germline_family }} not available<br><br>
+  {% endif %}
+
+  {% if non_human_peptides %}
+    Non-human peptides:
+
+    {% for peptide in non_human_peptides %}
+      <br> {{ peptide.seq }} ({%
+      if peptide.fraction_oas_subjects is none %}?{%
+      elif peptide.fraction_oas_subjects == 0 %}NOT PRESENT{%
+      elif peptide.fraction_oas_subjects >= 0.01 %}{{ '{:.0%} of human subjects'.format(peptide.fraction_oas_subjects | round(2, 'floor'))  }}{%
+      else %}{{ '{:.1%} of human subjects'.format(peptide.fraction_oas_subjects | round(3, 'floor')) }}{%
+      endif %})
+    {% endfor %}
+    <br>
+  {% endif %}
+
+  {{ pos.scheme.title() }} {{ pos }} {% if pos.is_in_cdr() %}({{ pos.get_region() }}){% elif is_vernier %}(Vernier zone){% endif %}
+
+{% endmacro %}
 
 {% macro annot_num(num, suffix_many, suffix_one)
 %}{{big_number_format(num, precision=0)}}<span class="text-secondary">{% if suffix_one and num == 1 %}&nbsp;{{suffix_one}}{% elif suffix_many %}&nbsp;{{suffix_many}}{% endif %}</span>{%
@@ -28,30 +70,26 @@ endmacro %}
 
 {% macro oasis_sequence_pair(parental_humanness, humanized_humanness, min_subj, url='', num_germlines=5) %}
   <div class="mb-2 font-monospace text-nowrap fs-smaller">
-    {% for pos, aa, num_non_human in parental_humanness.get_positional_humanness(min_subj)
+    {% for pos, aa, non_human_peptides in parental_humanness.get_positional_humanness(min_subj)
     %}{% set peptide = parental_humanness.get_peptide(pos, edges=True)
+    %}{% set num_non_human = (non_human_peptides | length)
     %}{% set freqs = parental_humanness.germline_family_residue_frequency.get(pos)
     %}<a href="{{ url }}#{{ pos }}" class="oasis-seq-aa {% if aa != humanized_humanness.chain[pos] %}oasis-seq-aa-mut{% endif %}"
-         data-bs-toggle="tooltip" data-tooltip-classes="tooltip-wide" data-bs-html="true"
-             title="{{ pos.scheme.title() }} {{ pos }}
-             <br>{{ peptide.seq }}: {{ format_percent_subjects(peptide.fraction_oas_subjects) }} subjects
-             <br>{{ format_aa_frequency_tooltip(parental_humanness.v_germline_family, aa, freqs) }}
-             "
-            style="border-top: 3px solid {% if pos.is_in_cdr() %}#777777{% elif pos.cdr_definition == 'kabat' and pos.is_in_vernier() %}#cccccc{% else %}white{% endif %};
+         data-bs-toggle="tooltip" data-tooltip-classes="tooltip-peptides" data-bs-html="true"
+             title="{{ format_sequence_tooltip(parental_humanness.v_germline_family, pos, aa, freqs, non_human_peptides, peptide) }}"
+            style="border-bottom: 3px solid {% if pos.is_in_cdr() %}#777777{% elif pos.cdr_definition == 'kabat' and pos.is_in_vernier() %}#cccccc{% else %}white{% endif %};
             background-color: rgb(255, {{ 255 - num_non_human**0.80 * 30 }}, {{ 255 - num_non_human**0.65 * 40 }});">{{ aa }}</a>{%
     endfor %}
     Parental
   </div>
   <div class="mb-2 font-monospace text-nowrap fs-smaller">
-    {% for pos, aa, num_non_human in humanized_humanness.get_positional_humanness(min_subj)
+    {% for pos, aa, non_human_peptides in humanized_humanness.get_positional_humanness(min_subj)
     %}{% set peptide = humanized_humanness.get_peptide(pos, edges=True)
+    %}{% set num_non_human = (non_human_peptides | length)
     %}{% set freqs = humanized_humanness.germline_family_residue_frequency.get(pos)
     %}<a href="{{ url }}#{{ pos }}" class="oasis-seq-aa {% if not freqs or freqs.get(aa, 0) < RARE_FAMILY_FREQUENCY %}oasis-seq-aa-rare{% endif %}"
-             data-bs-toggle="tooltip" data-bs-html="true" data-tooltip-classes="tooltip-wide"
-             title="{{ pos.scheme.title() }} {{ pos }}
-             <br>{{ peptide.seq }}: {{ format_percent_subjects(peptide.fraction_oas_subjects) }} subjects
-             <br>{{ format_aa_frequency_tooltip(humanized_humanness.v_germline_family, aa, freqs) }}
-             "
+             data-bs-toggle="tooltip" data-bs-html="true" data-tooltip-classes="tooltip-peptides"
+             title="{{ format_sequence_tooltip(humanized_humanness.v_germline_family, pos, aa, freqs, non_human_peptides, peptide) }}"
             style="background-color: rgb(255, {{ 255 - num_non_human**0.80 * 30 }}, {{ 255 - num_non_human**0.65 * 40 }});">{{ aa }}</a>{%
     endfor %}
     Humanized

@@ -6,7 +6,7 @@
 
 {%
   from 'humanization/humanize_alignment_component.html'
-  import format_percent_subjects, format_aa_frequency_tooltip, format_aa_frequency, annot_num with context
+  import chain_humanness_header, format_sequence_tooltip, format_percent_subjects, format_aa_frequency_tooltip, format_aa_frequency, annot_num with context
 %}
 
 {% block main %}
@@ -49,48 +49,46 @@
     <h3>Humanness report <span class="text-secondary fw-light">{{ result.input.name }}</span></h3>
 </div>
 
-<div class="card-group mb-3" style="max-width: 980px;">
+
+<div class="card-group mb-3" style="max-width: 700px;">
   <div class="card">
     <div class="card-body">
-      <h5 class="card-title">
-        <span class="badge fs-5 bg-spectral{{ '{:.0f}'.format(result.humanness.get_oasis_percentile(MIN_SUBJ)*100) }}">
+      <h5 class="card-title fs-4 fw-light">
+        <span class="fw-normal">{{ '{:.0%}'.format(result.humanness.get_oasis_identity(MIN_SUBJ)) }}</span> OASis identity
+      </h5>
+      <p class="card-text text-secondary fs-small">
+        {{ result.humanness.get_num_human_peptides(MIN_SUBJ) }}/{{ result.humanness.get_num_peptides() }} peptides are considered human
+        <br>(are found in at least {{ '{:.0%}'.format(MIN_SUBJ) }} of human subjects)
+      </p>
+      <p class="card-text text-secondary fs-small">
+        This corresponds to the
+        <span class="badge fw-normal bg-spectral{{ '{:.0f}'.format(result.humanness.get_oasis_percentile(MIN_SUBJ)*100) }}">
           {{ '{:.0%}'.format(result.humanness.get_oasis_percentile(MIN_SUBJ)) }}
         </span>
-        OASis percentile
-      </h5>
-      <p class="card-text"><small>Percentile of "OASis identity" among therapeutic antibodies</small></p>
+        percentile {{ info_icon('Percentile of OASis identity among therapeutic mAbs at the current prevalence threshold. Zero percentile corresponds to the least human and 100% percentile corresponds to the most human mAb in the clinic, including all clinical stage human, humanized and murine therapeutics.') }}
+      </p>
     </div>
   </div>
   <div class="card">
     <div class="card-body">
-      <h5 class="card-title">
-        <span class="badge fs-5 text-dark bg-light">
-          {{ '{:.0%}'.format(result.humanness.get_oasis_identity(MIN_SUBJ)) }}
-        </span>
-        OASis identity
+      <h5 class="card-title fs-4 fw-light">
+        <span class="fw-normal">{{ '{:.0%}'.format(result.humanness.get_germline_content()) }}</span>
+        germline content
       </h5>
-      <p class="card-text"><small>Fraction of 9-mer peptides found in at least {{ '{:.0%}'.format(MIN_SUBJ) }} of human subjects</small></p>
-    </div>
-  </div>
-  <div class="card">
-    <div class="card-body">
-      <h5 class="card-title">
-        <span class="badge fs-5 text-dark bg-light">
-          {{ '{:.0%}'.format(result.humanness.get_germline_content()) }}
-        </span>
-        Germline content
-      </h5>
-      <p class="card-text"><small>Sequence identity with nearest heavy and light human germline sequences.</small></p>
+      <p class="card-text text-secondary fs-small">Sequence identity with nearest heavy and light human germline sequences.</p>
+      <p class="card-text">
+        {{ result.humanness.vh.v_germline_family }}<span class="text-secondary">{{ result.humanness.vh.v_germline_suffix }}</span>
+        {% if result.humanness.vh and result.humanness.vl %}+{% endif %}
+        {{ result.humanness.vl.v_germline_family }}<span class="text-secondary">{{ result.humanness.vl.v_germline_suffix }}</span>
+      </p>
     </div>
   </div>
 </div>
 
 {% if result.humanness.vh %}
-  <h4>
+  <h4 class="fw-light">
     Heavy chain
-    <span class="badge fs-6 bg-spectral{{ '{:.0f}'.format(result.humanness.vh.get_oasis_percentile(MIN_SUBJ)*100) }}">
-      {{ '{:.0%}'.format(result.humanness.vh.get_oasis_percentile(MIN_SUBJ)) }} <span class="fw-normal">percentile</span>
-    </span>
+    {{ chain_humanness_header(result.humanness.vh, MIN_SUBJ) }}
   </h4>
   {{
     oasis_sequence(result.humanness.vh)
@@ -98,11 +96,9 @@
 {% endif %}
 
 {% if result.humanness.vl %}
-  <h4>
+  <h4 class="fw-light">
     Light chain
-    <span class="badge fs-6 bg-spectral{{ '{:.0f}'.format(result.humanness.vl.get_oasis_percentile(MIN_SUBJ)*100) }}">
-      {{ '{:.0%}'.format(result.humanness.vl.get_oasis_percentile(MIN_SUBJ)) }} <span class="fw-normal">percentile</span>
-    </span>
+    {{ chain_humanness_header(result.humanness.vl, MIN_SUBJ) }}
   </h4>
   {{
     oasis_sequence(result.humanness.vl)
@@ -110,12 +106,12 @@
 {% endif %}
 
 {% if result.humanness.vh %}
-  <h4>Heavy chain</h4>
+  <h4 class="fw-light">Heavy chain table</h4>
   {{ oasis_table(result.humanness.vh) }}
 {% endif %}
 
 {% if result.humanness.vl %}
-  <h4>Light chain</h4>
+  <h4 class="fw-light">Light chain table</h4>
   {{ oasis_table(result.humanness.vl) }}
 {% endif %}
 
@@ -125,15 +121,13 @@
 {% macro oasis_sequence(chain_humanness) %}
   <div class="text-nowrap">
     <div class="mb-2 font-monospace fs-smaller">
-        {% for pos, aa, num_non_human in chain_humanness.get_positional_humanness(MIN_SUBJ)
+        {% for pos, aa, non_human_peptides in chain_humanness.get_positional_humanness(MIN_SUBJ)
         %}{% set peptide = chain_humanness.get_peptide(pos, edges=True)
+        %}{% set num_non_human = (non_human_peptides | length)
         %}{% set freqs = chain_humanness.germline_family_residue_frequency.get(pos)
         %}<a href="#{{ pos }}" class="oasis-seq-aa {% if not freqs or freqs.get(aa, 0) < RARE_FAMILY_FREQUENCY %}oasis-seq-aa-rare{% endif %}"
-             data-bs-toggle="tooltip" data-bs-html="true"
-             title="{{ pos.scheme.title() }} {{ pos }}
-             <br>{{ peptide.seq }}: {{ format_percent_subjects(peptide.fraction_oas_subjects) }} subjects
-             <br>{{ format_aa_frequency_tooltip(chain_humanness.v_germline_family, aa, freqs) }}
-             "
+             data-bs-toggle="tooltip" data-bs-html="true" data-tooltip-classes="tooltip-peptides"
+             title="{{ format_sequence_tooltip(chain_humanness.v_germline_family, pos, aa, freqs, non_human_peptides, peptide) }}"
                 style="border-top: 3px solid {% if pos.is_in_cdr() %}#777777{% elif pos.cdr_definition == 'kabat' and pos.is_in_vernier() %}#cccccc{% else %}white{% endif %};
                 background-color: rgb(255, {{ 255 - num_non_human**0.80 * 30 }}, {{ 255 - num_non_human**0.65 * 40 }});">{{ aa }}</a>{%
         endfor %}
@@ -155,11 +149,11 @@
 {% endmacro %}
 
 {% macro oasis_table(chain_humanness) %}
-<table class="table table-humanization w-auto">
+<table class="table table-humanization">
   <thead>
     <tr>
       <th colspan="2" class="border-end">Position</th>
-      <th colspan="2" class="border-end">Amino acid</th>
+      <th colspan="3" class="border-end">Amino acid</th>
       <th colspan="3">OASis 9-mer peptide search</th>
       <th></th>
     </tr>
@@ -169,11 +163,11 @@
       <th>Region</th>
       <th class="border-end">{{ list(chain_humanness.peptides)[0].scheme.title() }}</th>
       <th>AA</th>
-      <th>Chain<br>Freq</th>
-      <th class="border-end">Family<br>Freq</th>
-      <th>Peptide</th>
-      <th>OAS Subjects</th>
-      <th>OAS Seqs</th>
+      <th>Chain<br>Freq&nbsp;{{ info_icon('Residue frequency in {} chain at given {} position'.format(chain_humanness.chain.chain_type, chain_humanness.chain.scheme.title())) }}</th>
+      <th class="border-end">Family<br>Freq&nbsp;{{ info_icon('Residue frequency in {} germline family at given {} position'.format(chain_humanness.v_germline_family, chain_humanness.chain.scheme.title())) }}</th>
+      <th>Peptide&nbsp;{{ info_icon('9-mer peptide starting at given position.') }}</th>
+      <th>OAS<br>Subjects&nbsp;{{ info_icon('Percentage of OAS human subjects containing this peptide in their repertoire.') }}</th>
+      <th>OAS<br>Sequences&nbsp;{{ info_icon('Number of total antibody sequences containing this peptide across across all human subjects in OAS.') }}</th>
       <th></th>
     </tr>
   </thead>
@@ -198,15 +192,15 @@
 <tr>
   <td class="text-end" style="width: 3.5em">{{ position.get_region() }}</td>
   <td class="border-end" style="width: 3.5em"><span class="chain-pos-anchor" id="{{ position }}">{{ position }}</span></td>
-  <td class="taylor-{{ aa }}" style="width: 1em">{{ aa }}</td>
+  <td class="taylor-{{ aa }}" style="width: 2.5em">{{ aa }}</td>
   <td class="border-end {% if chain_freqs is none or chain_freqs.get(aa, 0) < RARE_FAMILY_FREQUENCY %}text-danger{% endif %}"
-             style="width: 4em" data-bs-toggle="tooltip" data-tooltip-classes="tooltip-wide"
+             style="width: 5em" data-bs-toggle="tooltip" data-tooltip-classes="tooltip-wide"
              data-bs-html="true"
              title="{{ format_aa_frequency_tooltip(position.chain_type+' chain', aa, chain_freqs) }}">
     {{ format_aa_frequency(chain_freqs.get(aa, 0) if chain_freqs else None) }}
   </td>
   <td class="border-end {% if family_freqs is none or family_freqs.get(aa, 0) < RARE_FAMILY_FREQUENCY %}text-danger{% endif %}"
-             style="width: 4em" data-bs-toggle="tooltip" data-tooltip-classes="tooltip-wide"
+             style="width: 5em" data-bs-toggle="tooltip" data-tooltip-classes="tooltip-wide"
              data-bs-html="true"
              title="{{ format_aa_frequency_tooltip(v_germline_family, aa, family_freqs) }}">
     {{ format_aa_frequency(family_freqs.get(aa, 0) if family_freqs else None) }}

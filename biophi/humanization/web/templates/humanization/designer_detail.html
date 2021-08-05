@@ -49,84 +49,112 @@
   </div>
 </div>
 
-<div class="row mb-3 mt-2" style="max-width: 1150px;">
-  <div class="col-4">
-    <h5 class="card-title">
-      <span style="padding: .35em" class="badge fs-5 fw-light bg-spectral{{ '{:.0f}'.format(result.parental_humanness.get_oasis_percentile(MIN_SUBJ)*100) }}">
-        {{ '{:.0%}'.format(result.parental_humanness.get_oasis_percentile(MIN_SUBJ)) }}
-      </span>&nbsp;<span class="fw-light">→</span>&nbsp;<span
-            style="padding: .35em"
-            class="badge fs-5 bg-spectral{{ '{:.0f}'.format(result.humanized_humanness.get_oasis_percentile(MIN_SUBJ)*100) }}">
-        {{ '{:.0%}'.format(result.humanized_humanness.get_oasis_percentile(MIN_SUBJ)) }}
-      </span>
-      Humanness percentile
-    </h5>
+
+<div class="card-group mb-3" style="max-width: 750px;">
+  <div class="card">
+    <div class="card-body">
+      <h5 class="card-title fs-5 fw-light">
+        <span class="fw-normal">{{ '{:.0%}'.format(result.humanized_humanness.get_oasis_identity(MIN_SUBJ)) }}</span>
+        OASis identity
+        <span class="text-secondary">
+          ({{ '+{:.0%}'.format(result.humanized_humanness.get_oasis_identity(MIN_SUBJ) - result.parental_humanness.get_oasis_identity(MIN_SUBJ)) }})
+         &nbsp;{{ info_icon('{}/{} peptides are considered human (are found in at least {:.0%} of human subjects)'.format(result.humanized_humanness.get_num_human_peptides(MIN_SUBJ), result.humanized_humanness.get_num_peptides(), MIN_SUBJ), s=22) }}
+        </span>
+
+      </h5>
+      <p class="card-text text-secondary fs-small">
+        This corresponds to the
+        <span class="badge fw-normal bg-spectral{{ '{:.0f}'.format(result.humanized_humanness.get_oasis_percentile(MIN_SUBJ)*100) }}">
+          {{ '{:.0%}'.format(result.humanized_humanness.get_oasis_percentile(MIN_SUBJ)) }}
+        </span>
+        percentile {{ info_icon('Percentile of OASis identity among therapeutic mAbs at the current prevalence threshold. Zero percentile corresponds to the least human and 100% percentile corresponds to the most human mAb in the clinic, including all clinical stage human, humanized and murine therapeutics.') }}
+      </p>
+    </div>
   </div>
-  <div class="col-4">
-    <h5 class="card-title">
-      <span class="badge fs-5 text-dark bg-light">
-        <span class="fw-light">{{ '{:.0%}'.format(result.parental_humanness.get_oasis_identity(MIN_SUBJ))
-        }}&nbsp;→&nbsp;</span>{{ '{:.0%}'.format(result.humanized_humanness.get_oasis_identity(MIN_SUBJ)) }}
-      </span>
-      Human identity
-    </h5>
-  </div>
-  <div class="col-4">
-    <h5 class="card-title">
-      <span class="badge fs-5 text-dark bg-light">
-          <span class="fw-light">{{ '{:.0%}'.format(result.parental_humanness.get_germline_content())
-          }}&nbsp;→&nbsp;</span>{{ '{:.0%}'.format(result.humanized_humanness.get_germline_content()) }}
-      </span>
-      Germline content
-    </h5>
+  <div class="card">
+    <div class="card-body">
+      <h5 class="card-title fs-5 fw-light">
+        <span class="fw-normal">{{ '{:.0%}'.format(result.humanized_humanness.get_germline_content()) }}</span>
+        germline content
+        <span class="text-secondary">
+          ({{ '+{:.0%}'.format(result.humanized_humanness.get_germline_content() - result.parental_humanness.get_germline_content()) }})
+          {{ info_icon('Sequence identity with nearest heavy and light human germline sequences', s=22) }}
+        </span>
+      </h5>
+      <p class="card-text">
+        {{ result.humanized_humanness.vh.v_germline_family }}<span class="text-secondary">{{ result.humanized_humanness.vh.v_germline_suffix }}</span>
+        {% if result.humanized_humanness.vh and result.humanized_humanness.vl %}+{% endif %}
+        {{ result.humanized_humanness.vl.v_germline_family }}<span class="text-secondary">{{ result.humanized_humanness.vl.v_germline_suffix }}</span>
+      </p>
+    </div>
   </div>
 </div>
 
 {% if result.humanized_humanness.vh %}
-<h4>Heavy chain</h4>
+<h4 class="fw-light">Heavy chain</h4>
 {{
-  chain_designer(result.parental_humanness.vh, result.humanized_humanness.vh, result.humanization.vh, 'vh')
+  chain_designer(result, result.parental_humanness.vh, result.humanized_humanness.vh, result.humanization.vh, 'vh')
 }}
 {% endif %}
 
 {% if result.humanized_humanness.vl %}
-<h4 class="mt-4">Light chain</h4>
+<h4 class="fw-light mt-3">Light chain</h4>
 {{
-  chain_designer(result.parental_humanness.vl, result.humanized_humanness.vl, result.humanization.vl, 'vl')
+  chain_designer(result, result.parental_humanness.vl, result.humanized_humanness.vl, result.humanization.vl, 'vl')
 }}
 {% endif %}
 
 {% endblock %}
 
-{% macro chain_designer(parental_humanness, humanized_humanness, humanization, id) %}
+{% macro pos_tooltip(pos) %}
+{{ pos.scheme.title() }} {{ pos }}
+{% if pos.is_in_cdr() %}
+  ({{ pos.get_region() }})
+{% elif pos.cdr_definition == 'kabat' and pos.is_in_vernier() %}
+  (Vernier zone)
+{% endif %}
+{% endmacro %}
+
+{% macro mutation_tooltip(pos, current_aa, new_aa, backmutate=False) %}
+{{ pos_tooltip(pos) }}
+{% if current_aa != new_aa and new_aa != '-' %}
+  {% if backmutate %}
+  <br>{{ aa_name(new_aa) }}&nbsp;→&nbsp;{{ aa_name(current_aa) }}
+  <br>Click to revert mutation
+  {% else %}
+  <br>Click to mutate
+  <br>{{ aa_name(current_aa) }}&nbsp;→&nbsp;{{ aa_name(new_aa) }}
+  {% endif %}
+{% else %}
+  <br>{{ aa_name(new_aa) }}
+{% endif %}
+{% endmacro %}
+
+{% macro chain_designer(result, parental_humanness, humanized_humanness, humanization, id) %}
   <div class="mb-3 font-monospace text-nowrap fs-smaller designer-line designer-parental-line">
-    {% for pos, aa, num_non_human in parental_humanness.get_positional_humanness(MIN_SUBJ)
-    %}{% set is_vernier = pos.cdr_definition == 'kabat' and pos.is_in_vernier()
+    {% for pos, aa, non_human_peptides in parental_humanness.get_positional_humanness(MIN_SUBJ)
+    %}{% set num_non_human = (non_human_peptides | length)
     %}{% set peptide = parental_humanness.get_peptide(pos, edges=True)
     %}{% set freqs = parental_humanness.germline_family_residue_frequency.get(pos)
-    %}<a href="{{ url_for_arg(pos=pos, aa=aa, relative=True) }}"
-         data-pos="{{ pos }}" class="{% if aa != humanized_humanness.chain[pos] %}designer-mut
+    %}<a {% if aa != humanized_humanness.chain[pos] %} href="{{ url_for_arg(pos=pos, aa=aa, relative=True) }}" data-pos="{{ pos }}" {% endif %}
+         class="{% if aa != humanized_humanness.chain[pos] %}designer-mut
          {% if pos.is_in_cdr() or (pos.cdr_definition == 'kabat' and pos.is_in_vernier()) %}designer-mut-important{% endif %}{% endif %}"
          data-bs-toggle="tooltip" data-tooltip-classes="tooltip-medium" data-bs-html="true"
-         title="{{ pos.scheme.title() }} {{ pos }} {% if pos.is_in_cdr() %}(CDR){% elif is_vernier %}(Vernier zone){% endif %}
-             <br>{{ peptide.seq }}: {{ format_percent_subjects(peptide.fraction_oas_subjects) }} subjects
-             <br>{{ format_aa_frequency_tooltip(humanized_humanness.v_germline_family, aa, freqs) }}"
+         title="Parental {{ mutation_tooltip(pos, humanized_humanness.chain[pos], aa, backmutate=True) }}"
 
-            style="{% if pos.is_in_cdr() %}border-bottom: 3px solid #777777; {% elif is_vernier %}border-bottom: 3px solid #cccccc;{% endif %}
+            style="{% if pos.is_in_cdr() %}border-bottom: 3px solid #777777; {% elif pos.cdr_definition == 'kabat' and pos.is_in_vernier() %}border-bottom: 3px solid #cccccc;{% endif %}
             background-color: rgb(255, {{ 255 - num_non_human**0.80 * 30 }}, {{ 255 - num_non_human**0.65 * 40 }});">{{ aa }}</a>{%
     endfor %}
     Parental
   </div>
   <div class="mb-3 font-monospace text-nowrap fs-smaller designer-line designer-result-line">
-    {% for pos, aa, num_non_human in humanized_humanness.get_positional_humanness(MIN_SUBJ)
-    %}{% set is_vernier = pos.cdr_definition == 'kabat' and pos.is_in_vernier()
+    {% for pos, aa, non_human_peptides in humanized_humanness.get_positional_humanness(MIN_SUBJ)
+    %}{% set num_non_human = (non_human_peptides | length)
     %}{% set peptide = humanized_humanness.get_peptide(pos, edges=True)
     %}{% set freqs = humanized_humanness.germline_family_residue_frequency.get(pos)
     %}<span data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-html="true" data-tooltip-classes="tooltip-medium" data-result-pos="{{ pos }}"
             class="{% if aa != parental_humanness.chain[pos] %}designer-mut{% endif %} {% if not freqs or freqs.get(aa, 0) < RARE_FAMILY_FREQ %}oasis-seq-aa-rare{% endif %}"
-             title="{{ pos.scheme.title() }} {{ pos }} {% if pos.is_in_cdr() %}(CDR){% elif is_vernier %}(Vernier zone){% endif %}
-             <br>{{ peptide.seq }}: {{ format_percent_subjects(peptide.fraction_oas_subjects) }} subjects
-             <br>{{ format_aa_frequency_tooltip(humanized_humanness.v_germline_family, aa, freqs) }}"
+             title="Result {{ pos_tooltip(pos) }}<br>{{ aa_name(aa) }}<br>Click to enter mutation"
             style="background-color: rgb(255, {{ 255 - num_non_human**0.80 * 30 }}, {{ 255 - num_non_human**0.65 * 40 }});">{{ aa }}</span>{%
     endfor %}
     Result
@@ -134,29 +162,38 @@
   <ul class="nav nav-pills designer-pills mb-3" id="pills-tab-{{ id }}" role="tablist" style="margin-left: 200px;">
     <li class="nav-item" role="presentation">
       <button class="nav-link {% if not tab or tab == 'sapiens' %}active{% endif %}" id="pills-sapiens-tab-{{ id }}" data-bs-toggle="pill" data-bs-target="#pills-sapiens-{{ id }}"
-              type="button" role="tab" aria-controls="pills-sapiens-{{ id }}" aria-selected="true">Sapiens score</button>
+              type="button" role="tab" aria-controls="pills-sapiens-{{ id }}" aria-selected="true">
+        Sapiens score
+        {{ info_icon('Suggest mutations based on confidence score predicted by Sapiens deep learning method. Corresponds to probability of seeing given residue in the context of the given sequence in human OAS repertoires.', delay=500) }}
+      </button>
     </li>
     <li class="nav-item" role="presentation">
       <button class="nav-link {% if tab == 'freq' %}active{% endif %}" id="pills-freq-tab-{{ id }}" data-bs-toggle="pill" data-bs-target="#pills-freq-{{ id }}"
-              type="button" role="tab" aria-controls="pills-freq-{{ id }}" aria-selected="false">Frequency at position</button>
+              type="button" role="tab" aria-controls="pills-freq-{{ id }}" aria-selected="false">
+        Frequency at position
+        {{ info_icon('Suggest mutations based on residue frequency at each {} position in {} antibodies from human OAS repertoires.'.format(result.humanization_params.scheme.title(), humanized_humanness.v_germline_family), delay=500) }}
+      </button>
     </li>
     <li class="nav-item" role="presentation">
       <button class="nav-link {% if tab == 'germline' %}active{% endif %}" id="pills-germline-tab-{{ id }}" data-bs-toggle="pill" data-bs-target="#pills-germline-{{ id }}"
-              type="button" role="tab" aria-controls="pills-germline-{{ id }}" aria-selected="false">Germline sequences</button>
+              type="button" role="tab" aria-controls="pills-germline-{{ id }}" aria-selected="false">
+        Germline sequences
+        {{ info_icon('Suggest mutations based on nearest human germline sequences.', delay=500) }}
+      </button>
     </li>
   </ul>
   <div class="tab-content" id="pills-tabContent-{{ id }}">
     <div class="tab-pane {% if not tab or tab == 'sapiens' %}show active{% endif %}" id="pills-sapiens-{{ id }}" role="tabpanel" aria-labelledby="pills-sapiens-tab-{{ id }}">
       <div class="mb-2 font-monospace text-nowrap fs-smaller">
-        {% for scores in humanization.get_top_scores(5) %}
+        {% for scores in humanization.get_top_scores(5, next=True) %}
           <div class="hum-designer-scores designer-line">
             {% for pos, aa, score in scores
             %}{% if score > MIN_SAPIENS_SCORE %}<a
-                  href="{{ url_for_arg(pos=pos, aa=aa, tab='sapiens', relative=True) }}"
-                  data-bs-toggle="tooltip" data-bs-html="true"
-                  title="{{ pos.scheme.title() }} {{ pos }} {{ humanized_humanness.chain[pos] }}→{{ aa }}
-                  <br>{{ '{:.0%}'.format(score) }} score"
-                  data-pos="{{ pos }}" {% if humanized_humanness.chain[pos] == aa %}class="aa-match"{% endif %}
+                  {% if aa != humanized_humanness.chain[pos] %} href="{{ url_for_arg(pos=pos, aa=aa, tab='sapiens', relative=True) }}" data-pos="{{ pos }}" {% endif %}
+                  data-bs-toggle="tooltip" data-bs-html="true" data-bs-placement="bottom"
+                  title="{{ mutation_tooltip(pos, humanized_humanness.chain[pos], aa) }}
+                  <br>{{ '{:.0%}'.format(score) }} Sapiens score"
+                   {% if humanized_humanness.chain[pos] == aa %}class="aa-match"{% endif %}
                   style="background: rgb({{255-score**0.5*100}},{{255-score**0.5*150}},{{255}});"
             >{{aa}}</a>{% else %}<span></span>{% endif %}{%
             endfor %}
@@ -171,13 +208,12 @@
           <div class="hum-designer-scores designer-line">
             {% for pos, aa, freq in freqs
             %}{% if freq > MIN_FAMILY_FREQ %}<a
-                  href="{{ url_for_arg(pos=pos, aa=aa, tab='freq', relative=True) }}"
-                  data-bs-toggle="tooltip" data-bs-html="true"
-                  title="{{ pos.scheme.title() }} {{ pos }} {{ humanized_humanness.chain[pos] }}→{{ aa }}
+                  {% if aa != humanized_humanness.chain[pos] %} href="{{ url_for_arg(pos=pos, aa=aa, tab='freq', relative=True) }}" data-pos="{{ pos }}" {% endif %}
+                  data-bs-toggle="tooltip" data-bs-html="true" data-bs-placement="bottom"
+                  title="{{ mutation_tooltip(pos, humanized_humanness.chain[pos], aa) }}
                   <br>{{ '{:.0%}'.format(freq) }} frequency in {{ humanized_humanness.v_germline_family }}"
-                  data-pos="{{ pos }}" {% if humanized_humanness.chain[pos] == aa %}class="aa-match"{% endif %}
-                  style="background: rgb({{255-freq**0.5*255}},{{255-freq**0.5*100}},{{255-freq**0.5*100}});"
-            >{{ aa }}</a>{% else %}<span></span>{% endif %}{%
+                   {% if humanized_humanness.chain[pos] == aa %}class="aa-match"{% endif %}
+                  style="background: rgb({{255-freq**0.5*255}},{{255-freq**0.5*100}},{{255-freq**0.5*100}});">{{ aa }}</a>{% else %}<span></span>{% endif %}{%
             endfor %}
             #{{ loop.index }} at germline position
           </div>
@@ -192,11 +228,10 @@
             <div class="designer-line">
               {% for (imgt_pos, seq_aa), (pos, _) in zip(humanized_humanness.imgt_chain, humanized_humanness.chain)
               %}{% set germline_aa = v_germlines[i][imgt_pos] or j_germlines[i][imgt_pos] or '-' %}<a
-                    data-bs-toggle="tooltip" title="{{ pos.scheme.title() }} {{ pos }} {{ humanized_humanness.chain[pos] }}→{{ germline_aa }}"
-                    {% if germline_aa != "-" %}href="{{ url_for_arg(pos=pos, aa=germline_aa, tab='germline', relative=True) }}"{% endif %}
+                    data-bs-toggle="tooltip" data-bs-html="true" data-bs-placement="bottom" title="{{ mutation_tooltip(pos, seq_aa, germline_aa) }}"
+                    {% if germline_aa != "-" and germline_aa != seq_aa %} href="{{ url_for_arg(pos=pos, aa=germline_aa, tab='germline', relative=True) }}" data-pos="{{ pos }}"{% endif %}
                     {% if seq_aa == germline_aa %}class="aa-match"{% endif %}
-                    style="background: #b3f7b3; {% if pos.is_in_cdr() %}opacity: 0.6;{% endif %}"
-                    data-pos="{{ pos }}">{{ germline_aa }}</a>{%
+                    style="background: #b3f7b3; {% if pos.is_in_cdr() %}opacity: 0.6;{% endif %}">{{ germline_aa }}</a>{%
               endfor %}
               {{ v_germlines[i].name }}, {{ j_germlines[i].name }}
             </div>
@@ -226,7 +261,7 @@
                 elem.classList.remove('active')
             })
         }))
-        var designerLinks = document.querySelectorAll('.designer-line a');
+        var designerLinks = document.querySelectorAll('.designer-line a[href]');
         designerLinks.forEach(target => target.addEventListener('click', function (event) {
             if(target.hasAttribute('href')) {
               designerLinks.forEach(function(elem) {

@@ -6,18 +6,7 @@
     {% if result.humanization_params.humanize_cdrs %}
       | Humanizing CDRs ({{ result.humanization_params.cdr_definition }})
     {% else %}
-      | Keeping parental CDRs ({{ result.humanization_params.cdr_definition }})
-    {% endif %}
-    {% if not results %}
-      |
-      {% if result.humanized_humanness.vh %}
-        VH Germline: auto
-        ({{ result.humanized_humanness.vh.v_germline_names[0] }}){% if result.humanized_humanness.vl %},{% endif %}
-      {% endif %}
-      {% if result.humanized_humanness.vl %}
-        VL Germline: auto
-        ({{ result.humanized_humanness.vl.v_germline_names[0] }})
-      {% endif %}
+      | Keeping parental CDRs ({{ result.humanization_params.cdr_definition }}{% if result.humanization_params.backmutate_vernier %} + vernier{% endif %})
     {% endif %}
   {% elif result.humanization_params.method == 'cdr_grafting' %}
     {% if result.humanization_params.backmutate_vernier %}
@@ -30,16 +19,10 @@
     {% endif %}
     |
     {% if result.humanized_humanness.vh %}
-      VH Germline: {{ result.humanization_params.heavy_v_germline }}{%
-      if not results %}
-        ({{ result.humanized_humanness.vh.v_germline_names[0] }}){%
-      endif %}{% if result.humanized_humanness.vl %},{% endif %}
+      VH Germline: {{ result.humanization_params.heavy_v_germline }}{% if result.humanized_humanness.vl %},{% endif %}
     {% endif %}
     {% if result.humanized_humanness.vl %}
       VL Germline: {{ result.humanization_params.light_v_germline }}
-      {% if not results %}
-        ({{ result.humanized_humanness.vl.v_germline_names[0] }})
-      {% endif %}
     {% endif %}
   {% endif %}
 

@@ -50,17 +50,17 @@
   <thead>
     <tr>
       <th class="{{ SORTABLE }} border-end">Name</th>
-      <th class="{{ SORTABLE }}">OASis<br>Percentile</th>
-      <th class="{{ SORTABLE }}">OASis<br>Identity</th>
-      <th class="{{ SORTABLE }} border-end">Germline<br>Content</th>
-      <th class="{{ SORTABLE }}">OASis<br>Percentile</th>
-      <th class="{{ SORTABLE }}">OASis<br>Identity</th>
-      <th class="{{ SORTABLE }}">Germline<br>Gene</th>
-      <th class="{{ SORTABLE }} border-end">Germline<br>Content</th>
-      <th class="{{ SORTABLE }}">OASis<br>Percentile</th>
-      <th class="{{ SORTABLE }}">OASis<br>Identity</th>
-      <th class="{{ SORTABLE }}">Germline<br>Gene</th>
-      <th class="{{ SORTABLE }} border-end">Germline<br>Content</th>
+      <th class="{{ SORTABLE }}">OASis<br>Identity&nbsp;{{ info_icon('Fraction of 9-mer peptides considered human based on given prevalence threshold') }}</th>
+      <th class="{{ SORTABLE }}">OASis<br>Percentile&nbsp;{{ info_icon('Percentile of OASis identity among therapeutic mAbs at the current prevalence threshold. Zero percentile corresponds to the least human and 100% percentile corresponds to the most human mAb in the clinic, including all clinical stage human, humanized and murine therapeutics.') }}</th>
+      <th class="{{ SORTABLE }} border-end">Germline<br>Content&nbsp;{{ info_icon('Sequence identity with nearest heavy and light human germline sequences') }}</th>
+      <th class="{{ SORTABLE }}">OASis<br>Identity&nbsp;{{ info_icon('Fraction of heavy chain 9-mer peptides considered human based on given prevalence threshold') }}</th>
+      <th class="{{ SORTABLE }}">OASis<br>Percentile&nbsp;{{ info_icon('Percentile of heavy chain OASis identity among therapeutic mAbs at the current prevalence threshold. Zero percentile corresponds to the least human and 100% percentile corresponds to the most human mAb in the clinic, including all clinical stage human, humanized and murine therapeutics.') }}</th>
+      <th class="{{ SORTABLE }}">Germline<br>Gene&nbsp;{{ info_icon('Nearest human heavy germline gene based on sequence similarity.') }}</th>
+      <th class="{{ SORTABLE }} border-end">Germline<br>Content&nbsp;{{ info_icon('Sequence identity with nearest human heavy germline sequence') }}</th>
+      <th class="{{ SORTABLE }}">OASis<br>Identity&nbsp;{{ info_icon('Fraction of light chain 9-mer peptides considered human based on given prevalence threshold') }}</th>
+      <th class="{{ SORTABLE }}">OASis<br>Percentile&nbsp;{{ info_icon('Percentile of light chain OASis identity among therapeutic mAbs at the current prevalence threshold. Zero percentile corresponds to the least human and 100% percentile corresponds to the most human mAb in the clinic, including all clinical stage human, humanized and murine therapeutics.') }}</th>
+      <th class="{{ SORTABLE }}">Germline<br>Gene&nbsp;{{ info_icon('Nearest human light germline gene based on sequence similarity.') }}</th>
+      <th class="{{ SORTABLE }} border-end">Germline<br>Content&nbsp;{{ info_icon('Sequence identity with nearest human light germline sequence') }}</th>
       <th>Actions</th>
     </tr>
   </thead>
@@ -72,8 +72,8 @@
           <td class="border-end text-danger border-end" colspan="10">Failed: {{ result }}</td>
         {% else %}
           {% set min_subj = result.oasis_params.min_fraction_subjects %}
-          <td class="text-bold bg-spectral{{ '{:.0f}'.format(result.humanness.get_oasis_percentile(min_subj)*100) }}">{{ '{:.0%}'.format(result.humanness.get_oasis_percentile(min_subj)) }}</td>
           <td>{{ '{:.0%}'.format(result.humanness.get_oasis_identity(min_subj)) }}</td>
+          <td class="text-bold bg-spectral{{ '{:.0f}'.format(result.humanness.get_oasis_percentile(min_subj)*100) }}">{{ '{:.0%}'.format(result.humanness.get_oasis_percentile(min_subj)) }}</td>
           <td class="border-end">{{ '{:.0%}'.format(result.humanness.get_germline_content()) }}</td>
 
           {{ chain_row(result.humanness.vh, min_subj) }}
@@ -110,10 +110,10 @@
 
 {% macro chain_row(chain_humanness, min_subj) %}
 {% if chain_humanness %}
+  <td>{{ '{:.0%}'.format(chain_humanness.get_oasis_identity(min_subj)) }}</td>
   <td class="border-spectral{{ '{:.0f}'.format(chain_humanness.get_oasis_percentile(min_subj)*100) }}">
     {{ '{:.0%}'.format(chain_humanness.get_oasis_percentile(min_subj)) }}
   </td>
-  <td>{{ '{:.0%}'.format(chain_humanness.get_oasis_identity(min_subj)) }}</td>
   <td>{{ chain_humanness.v_germline_names[0] }}</td>
   <td class="border-end">{{ '{:.0%}'.format(chain_humanness.get_germline_content()) }}</td>
 {% else %}

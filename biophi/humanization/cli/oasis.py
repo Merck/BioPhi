@@ -11,11 +11,11 @@ from functools import partial
 @click.command()
 @click.argument('inputs', required=True, nargs=-1)
 @click.option('--output', required=False, help='Output XLSX report file path')
-@click.option('--oas-db', required=True, help='OAS peptide database connection string')
+@click.option('--oasis-db', required=True, help='OAS peptide database connection string')
 @click.option('--scheme', default='kabat', help='Numbering scheme (kabat, chothia, imgt, aho)')
 @click.option('--cdr-definition', default='kabat', help='Numbering scheme (kabat, chothia, imgt, north)')
 @click.option('--min-percent-subjects', default=10, type=float, help='Minimum percent of OAS subjects to consider peptide human')
-def oasis(inputs, output, oas_db, scheme, cdr_definition, min_percent_subjects):
+def oasis(inputs, output, oasis_db, scheme, cdr_definition, min_percent_subjects):
     """OASis: Antibody humanness evaluation using 9-mer peptide search.
 
     OASis evaluates antibody humanness by searching all overlapping 9-mers
@@ -25,8 +25,8 @@ def oasis(inputs, output, oas_db, scheme, cdr_definition, min_percent_subjects):
 
         \b
         # Evaluate humanness from FASTA file(s), save OASis humanness report to directory
-        biophi oasis input.fa --output ./report/ \\
-          --oas-db sqlite:////Absolute/path/to/oas_human_subject_9mers_2019_11.db
+        biophi oasis input.fa --output ./report.xlsx \\
+          --oasis-db sqlite:////Absolute/path/to/oas_human_subject_9mers_2019_11.db
 
     INPUTS: Input FASTA file path(s)
     """
@@ -35,12 +35,15 @@ def oasis(inputs, output, oas_db, scheme, cdr_definition, min_percent_subjects):
    | | | |/ _ \\\\___ \| / __|
    | |_| / ___ \___| | \__ \\
     \___/_/   \_\___/|_|___/
-         {}'''.format(f'version 1.0'.rjust(20)))
+                           ''')
 
     assert 1 <= min_percent_subjects <= 90, '--min-percent-subjects should be between 1 and 90'
 
+    if not output.endswith('.xlsx'):
+        raise ValueError(f'The --output is a spreadsheet and should have an .xlsx extension')
+
     click.echo(f'Settings:', err=True)
-    click.echo(f'- OAS database: {oas_db}', err=True)
+    click.echo(f'- OASis database: {oasis_db}', err=True)
     click.echo('', err=True)
 
     click.echo(f'Loading chains: {" ".join(inputs)}', err=True)
@@ -66,7 +69,7 @@ def oasis(inputs, output, oas_db, scheme, cdr_definition, min_percent_subjects):
     show_unpaired_warning(antibody_inputs)
 
     oasis_params = OASisParams(
-        oasis_db_path=oas_db,
+        oasis_db_path=oasis_db,
         min_fraction_subjects=min_percent_subjects/100
     )
     pool = Pool()

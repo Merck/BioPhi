@@ -18,12 +18,7 @@
     <p style="max-width: 800px">Sapiens is a high-throughput humanization method based on deep learning on antibody repertoires
       of more&nbsp;than 500 human subjects from the <a href="http://opig.stats.ox.ac.uk/webapps/oas/" target="_blank">Observed Antibody Space</a> database.</p>
 
-    <a class="text-secondary text-decoration-none" data-bs-toggle="collapse" href="#" data-bs-target=".advanced-settings" role="button">
-      Advanced settings {{ icon('sliders') }}
-    </a>
-
-    <div class="collapse advanced-settings">
-      <div class="mt-2 mb-1">
+    <div class="mt-2 mb-1">
         <label for="iterations" class="form-label">Humanization iterations</label>
         <input type="number" size="3" style="width: 4.5em; display: inline-block;"
                value="{{ sapiens_humanization_params.iterations }}"
@@ -36,69 +31,52 @@
                  {% if sapiens_humanization_params.humanize_cdrs %}checked{% endif %}>
           <label class="form-check-label" for="humanize_cdrs">
             Humanize CDRs
-            {{ info_icon('Perform humanizing mutations in complementarity-determining regions (will impact binding)') }}
+            {{ info_icon('Allow predicting humanizing mutations in complementarity-determining regions (will impact binding)') }}
           </label>
         </div>
       </div>
-    </div>
   </div>
   <div id="method_args2" class="tab-pane" role="tabpanel">
     <p>Graft the CDR regions into the nearest human V and J gene sequences based on % sequence identity.</p>
 
-    <a class="text-secondary text-decoration-none" data-bs-toggle="collapse" href="#" data-bs-target=".advanced-settings" role="button">
-      Advanced settings {{ icon('sliders') }}
-    </a>
-
-    <div class="collapse advanced-settings">
-      <div class="mt-2 mb-3">
-        <div class="d-inline-block me-3">
-          <label class="form-label">
-            Heavy germline
-            {{ info_icon('Germline heavy V gene to use as template for humanization. Use Auto to pick nearest germline based on sequence homology.') }}
-          </label>
-          <select name="heavy_v_germline" class="form-select form-select-sm" style="width: 150px;">
-            <option value="auto">Auto</option>
-            {% for name in heavy_germlines %}
-              <option value="{{ name }}" {% if cdr_grafting_humanization_params.heavy_v_germline == name %}selected{% endif %}>
-                {{ name }}
-              </option>
-            {% endfor %}
-          </select>
-        </div>
-        <div class="d-inline-block">
-          <label class="form-label">
-            Light germline
-            {{ info_icon('Germline light V gene to use as template for humanization. Use Auto to pick nearest germline based on sequence homology.') }}
-          </label>
-          <select name="light_v_germline" class="form-select form-select-sm" style="width: 150px;">
-            <option value="auto">Auto</option>
-            {% for name in light_germlines %}
-              <option value="{{ name }}" {% if cdr_grafting_humanization_params.light_v_germline == name %}selected{% endif %}>
-                {{ name }}
-              </option>
-            {% endfor %}
-          </select>
-        </div>
+    <div class="mt-2 mb-3">
+      <div class="d-inline-block me-3">
+        <label class="form-label">
+          Heavy germline
+          {{ info_icon('Germline heavy V gene to use as template for humanization. Use Auto to pick nearest germline based on sequence homology.') }}
+        </label>
+        <select name="heavy_v_germline" class="form-select form-select-sm" style="width: 150px;">
+          <option value="auto">Auto</option>
+          {% for name in heavy_germlines %}
+            <option value="{{ name }}" {% if cdr_grafting_humanization_params.heavy_v_germline == name %}selected{% endif %}>
+              {{ name }}
+            </option>
+          {% endfor %}
+        </select>
       </div>
-      <div class="mb-2">
-        <div class="form-check ms-2 d-inline-block">
-          <input class="form-check-input" type="checkbox" value="yes" name="cdr_grafting_backmutate_vernier"
-                 id="cdr_grafting_backmutate_vernier" {% if cdr_grafting_humanization_params.backmutate_vernier %}checked{% endif %}>
-          <label class="form-check-label" for="cdr_grafting_backmutate_vernier">
-            Back-mutate Vernier zone residues (Kabat only)
-            {{ info_icon('Do not perform humanizing mutations in Vernier zones to minimize impact on binding. Can only be used with Kabat CDR definition.') }}
-          </label>
-        </div>
+      <div class="d-inline-block">
+        <label class="form-label">
+          Light germline
+          {{ info_icon('Germline light V gene to use as template for humanization. Use Auto to pick nearest germline based on sequence homology.') }}
+        </label>
+        <select name="light_v_germline" class="form-select form-select-sm" style="width: 150px;">
+          <option value="auto">Auto</option>
+          {% for name in light_germlines %}
+            <option value="{{ name }}" {% if cdr_grafting_humanization_params.light_v_germline == name %}selected{% endif %}>
+              {{ name }}
+            </option>
+          {% endfor %}
+        </select>
       </div>
-      <div class="mb-2">
-        <div class="form-check ms-2 d-inline-block">
-          <input class="form-check-input" type="checkbox" value="yes" name="sapiens_final_pass"
-                 id="sapiens_final_pass" {% if cdr_grafting_humanization_params.sapiens_iterations %}checked{% endif %}>
-          <label class="form-check-label" for="sapiens_final_pass">
-            Perform final humanization pass using Sapiens
-            {{ info_icon('After creating the CDR graft, apply Sapiens to humanize the sequence further and repair potential issues') }}
-          </label>
-        </div>
+    </div>
+    <div class="mb-2">
+      <div class="form-check ms-2 d-inline-block">
+        <input class="form-check-input" type="checkbox" value="yes" name="sapiens_final_pass"
+               id="sapiens_final_pass" {% if cdr_grafting_humanization_params.sapiens_iterations %}checked{% endif %}>
+        <label class="form-check-label" for="sapiens_final_pass">
+          Perform final humanization pass using Sapiens
+          {{ info_icon('After creating the CDR graft, apply Sapiens to humanize the sequence further and repair potential issues') }}
+        </label>
       </div>
     </div>
   </div>

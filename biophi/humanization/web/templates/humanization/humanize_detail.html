@@ -6,7 +6,7 @@
 
 {%
   from 'humanization/humanize_alignment_component.html'
-  import oasis_sequence_pair, format_percent_subjects, format_aa_frequency_tooltip, format_aa_frequency, annot_num with context
+  import chain_humanness_header, oasis_sequence_pair, format_percent_subjects, format_aa_frequency_tooltip, format_aa_frequency, annot_num with context
 %}
 
 {% block main %}
@@ -58,57 +58,64 @@
   </div>
 </div>
 
-<div class="card-group mb-3" style="max-width: 1150px;">
+
+<div class="card-group mb-3" style="max-width: 700px;">
   <div class="card">
     <div class="card-body">
-      <h5 class="card-title">
-        <span style="padding: .35em" class="badge fs-5 fw-light bg-spectral{{ '{:.0f}'.format(result.parental_humanness.get_oasis_percentile(MIN_SUBJ)*100) }}">
-          {{ '{:.0%}'.format(result.parental_humanness.get_oasis_percentile(MIN_SUBJ)) }}
-        </span>&nbsp;<span class="fw-light">→</span>&nbsp;<span
-              style="padding: .35em"
-              class="badge fs-5 bg-spectral{{ '{:.0f}'.format(result.humanized_humanness.get_oasis_percentile(MIN_SUBJ)*100) }}">
+      <h5 class="card-title fs-4 fw-light">
+        <span class="fw-normal">{{ '{:.0%}'.format(result.humanized_humanness.get_oasis_identity(MIN_SUBJ)) }}</span>
+        OASis identity
+        <span class="text-secondary">
+          ({{ '+{:.0%}'.format(result.humanized_humanness.get_oasis_identity(MIN_SUBJ) - result.parental_humanness.get_oasis_identity(MIN_SUBJ)) }})
+        </span>
+      </h5>
+      <p class="card-text text-secondary fs-small">
+        {{ result.humanized_humanness.get_num_human_peptides(MIN_SUBJ) }}/{{ result.humanized_humanness.get_num_peptides() }} peptides are considered human
+        <br>(are found in at least {{ '{:.0%}'.format(MIN_SUBJ) }} of human subjects)
+      </p>
+      <p class="card-text text-secondary fs-small">
+        This corresponds to the
+        <span class="badge fw-normal bg-spectral{{ '{:.0f}'.format(result.humanized_humanness.get_oasis_percentile(MIN_SUBJ)*100) }}">
           {{ '{:.0%}'.format(result.humanized_humanness.get_oasis_percentile(MIN_SUBJ)) }}
         </span>
-        OASis percentile
-      </h5>
-      <p class="card-text"><small>Percentile of "OASis identity" among therapeutic antibodies</small></p>
+        percentile {{ info_icon('Percentile of OASis identity among therapeutic mAbs at the current prevalence threshold. Zero percentile corresponds to the least human and 100% percentile corresponds to the most human mAb in the clinic, including all clinical stage human, humanized and murine therapeutics.') }}
+      </p>
     </div>
   </div>
   <div class="card">
     <div class="card-body">
-      <h5 class="card-title">
-        <span class="badge fs-5 text-dark bg-light">
-          <span class="fw-light">{{ '{:.0%}'.format(result.parental_humanness.get_oasis_identity(MIN_SUBJ))
-          }}&nbsp;→&nbsp;</span>{{ '{:.0%}'.format(result.humanized_humanness.get_oasis_identity(MIN_SUBJ)) }}
+      <h5 class="card-title fs-4 fw-light">
+        <span class="fw-normal">{{ '{:.0%}'.format(result.humanized_humanness.get_germline_content()) }}</span>
+        germline content
+        <span class="text-secondary">
+          ({{ '+{:.0%}'.format(result.humanized_humanness.get_germline_content() - result.parental_humanness.get_germline_content()) }})
         </span>
-        OASis identity
       </h5>
-      <p class="card-text"><small>Fraction of 9-mer peptides found in at least {{ '{:.0%}'.format(MIN_SUBJ) }} of human subjects</small></p>
-    </div>
-  </div>
-  <div class="card">
-    <div class="card-body">
-      <h5 class="card-title">
-        <span class="badge fs-5 text-dark bg-light">
-          <span class="fw-light">{{ '{:.0%}'.format(result.parental_humanness.get_germline_content())
-          }}&nbsp;→&nbsp;</span>{{ '{:.0%}'.format(result.humanized_humanness.get_germline_content()) }}
-        </span>
-        Germline content
-      </h5>
-      <p class="card-text"><small>Sequence identity with nearest heavy and light human germline sequences.</small></p>
+      <p class="card-text text-secondary fs-small">Sequence identity with nearest heavy and light human germline sequences.</p>
+      <p class="card-text">
+        {{ result.humanized_humanness.vh.v_germline_family }}<span class="text-secondary">{{ result.humanized_humanness.vh.v_germline_suffix }}</span>
+        {% if result.humanized_humanness.vh and result.humanized_humanness.vl %}+{% endif %}
+        {{ result.humanized_humanness.vl.v_germline_family }}<span class="text-secondary">{{ result.humanized_humanness.vl.v_germline_suffix }}</span>
+      </p>
     </div>
   </div>
 </div>
 
 {% if result.humanized_humanness.vh %}
-  <h4>Heavy chain</h4>
+  <h4 class="fw-light">
+    Heavy chain
+    {{ chain_humanness_header(result.humanized_humanness.vh, MIN_SUBJ) }}
+  </h4>
   {{
     oasis_sequence_pair(result.parental_humanness.vh, result.humanized_humanness.vh, MIN_SUBJ)
   }}
 {% endif %}
 
 {% if result.humanized_humanness.vl %}
-  <h4>Light chain</h4>
+  <h4 class="fw-light">
+    Light chain
+    {{ chain_humanness_header(result.humanized_humanness.vl, MIN_SUBJ) }}
+  </h4>
   {{
     oasis_sequence_pair(result.parental_humanness.vl, result.humanized_humanness.vl, MIN_SUBJ)
   }}
@@ -126,24 +133,20 @@
 </div>
 
 {% if result.humanization.vh %}
-  <h4>Heavy chain</h4>
+  <h4 class="fw-light">Heavy chain table</h4>
   {{ humanization_table(result.humanization.vh, result.parental_humanness.vh, result.humanized_humanness.vh) }}
 {% endif %}
 
 {% if result.humanization.vl %}
-  <h4>Light chain</h4>
+  <h4 class="fw-light">Light chain table</h4>
   {{ humanization_table(result.humanization.vl, result.parental_humanness.vl, result.humanized_humanness.vl) }}
 {% endif %}
 
 {% endblock %}
 
 
-
-
-{% macro format_peptide_aa(peptide, aa, loop_index) %}{% if loop_index == (((peptide | length) / 2) | round(0, 'ceil') | int) %}<span class="peptide-center">{{ aa }}</span>{% else %}{{ aa }}{% endif %}{% endmacro %}
-
 {% macro format_peptide(peptide, other_peptide) %}
-{% for a, b in zip(peptide, other_peptide) %}{% if a != b %}<strong>{{ format_peptide_aa(peptide, a, loop.index) }}</strong>{% else %}{{format_peptide_aa(peptide, a, loop.index) }}{% endif %}{% endfor %}
+{% for a, b in zip(peptide, other_peptide) %}{% if a != b %}<strong>{{ a }}</strong>{% else %}{{ a }}{% endif %}{% endfor %}
 {% endmacro %}
 
 
@@ -197,31 +200,31 @@ if not parental.has_position(pos) and not humanized.has_position(pos) %}table-hu
     <table class="table table-humanization w-auto">
       <thead>
         <tr>
-          <th colspan="2"></th>
+          <th class="col-section-end" colspan="2"></th>
           <th class="col-section-end" colspan="2">Sequence</th>
           <th class="col-section-end" colspan="{% if chain_humanization.scores %}2{% else %}1{% endif %}">Confidence</th>
-          <th class="col-section-end" colspan="2">9-mers</th>
+          <th class="col-section-end" colspan="2">Peptides</th>
           <th colspan="2">Observed Antibody Space</th>
         </tr>
         <tr>
-          <th style="width: 6em">Region</th>
+          <th style="width: 6em" class="text-end">Region</th>
           <th style="width: 3.5em" class="col-section-end">{{ chain_humanization.parental_chain.scheme.title() }}</th>
           <th style="width: 2.25em">Orig</th>
           <th style="width: 2.25em" class="col-section-end">Mut</th>
           {% if chain_humanization.scores %}
-          <th style="width: 5.5em" class="col-section-end">Score</th>
+          <th style="width: 6em" class="col-section-end">Sapiens<br>Score&nbsp;{{ info_icon('Confidence score predicted by Sapiens deep learning method. Corresponds to probability of seeing given residue in the context of the given sequence in human repertoires from the Observed Antibody Space database.') }}</th>
           {% endif %}
-          <th style="width: 5.5em" class="col-section-end">Frequency</th>
+          <th style="width: 6em" class="col-section-end">Residue<br>Freq&nbsp;{{ info_icon('Residue frequency in {} germline family at given {} position in human repertoires from the Observed Antibody Space database.'.format(humanized_humanness.v_germline_family, humanized_humanness.chain.scheme.title())) }}</th>
           <th style="width: 9em">Parental</th>
           <th style="width: 9em" class="col-section-end">Humanized</th>
-          <th style="width: 12em">Subjects</th>
-          <th style="width: 14em">9-mer hits</th>
+          <th style="width: 12em">OAS<br>Subjects&nbsp;{{ info_icon('Percentage of human subjects from the Observed Antibody Space database containing this peptide in their repertoire.') }}</th>
+          <th style="width: 14em">OAS<br>Sequences&nbsp;{{ info_icon('Number of total antibody sequences containing this peptide across across all human subjects in the Observed Antibody Space database.') }}</th>
         </tr>
       </thead>
       <tbody>
         {% for position, (a, b) in chain_humanization.alignment %}
           {% set scores = chain_humanization.scores.get(position) %}
-          {% set freqs = parental_humanness.germline_family_residue_frequency.get(position) %}
+          {% set freqs = humanized_humanness.germline_family_residue_frequency.get(position) %}
           <tr class="{% if a == b %}not-mutated-row collapse show{% else %}mutated-row{% endif %} {{ mark_section_boundary(parental_humanness, humanized_humanness, chain_humanization.alignment.positions[loop.index-1-1]) }}">
             <td class="text-end table-region-{{ position.get_region() }}">
               {{ position.get_region() | upper }}{% if position.cdr_definition == 'kabat' and position.is_in_vernier() %}&nbsp;Vernier{% endif %}
@@ -235,7 +238,7 @@ if not parental.has_position(pos) and not humanized.has_position(pos) %}table-hu
               <td class="text-center text-secondary col-section-end"
                    data-bs-toggle="tooltip" data-bs-html="true"
                    title="Sapiens predicted score">
-                {{ '{:.0f}'.format(scores[b]*100) if scores and b in scores else '?' }}
+                {{ '{:.0%}'.format(scores[b]) if scores and b in scores else '?' }}
               </td>
               {% endif %}
               <td class="text-center text-secondary col-section-end"
@@ -253,9 +256,9 @@ if not parental.has_position(pos) and not humanized.has_position(pos) %}table-hu
               {% if chain_humanization.scores %}
               <td class="text-center col-section-end">
                 {{
-                '{:.0f}'.format(scores[a]*100) if scores and a in scores else '?'
+                '{:.0%}'.format(scores[a]) if scores and a in scores else '?'
                 }}&nbsp;→&nbsp;{{
-                '{:.0f}'.format(scores[b]*100) if scores and b in scores else '?'
+                '{:.0%}'.format(scores[b]) if scores and b in scores else '?'
                 }}
               </td>
               {% endif %}

@@ -131,6 +131,12 @@ p.subheading {
    width: 280px;
 }
 
+.tooltip-peptides .tooltip-inner {
+   max-width: 320px;
+   min-width: 280px;
+   font-size: 90%;
+}
+
 tr[data-href] {
     cursor: pointer;
 }

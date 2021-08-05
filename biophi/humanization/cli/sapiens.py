@@ -23,14 +23,14 @@ from biophi.humanization.web.tasks import humanize_antibody_task, HumanizeAntibo
 @click.option('--fasta-only', is_flag=True, default=False, type=bool, help='Output only a FASTA file with humanized sequences (speeds up processing)')
 @click.option('--scores-only', is_flag=True, default=False, type=bool, help='Output only a CSV file with Sapiens position*residue scores')
 @click.option('--mean-score-only', is_flag=True, default=False, type=bool, help='Output only a CSV file with one Sapiens score per sequence')
-@click.option('--oas-db', required=False, help='OAS peptide database connection string (required to run OASis)')
+@click.option('--oasis-db', required=False, help='OAS peptide database connection string (required to run OASis)')
 @click.option('--version', default='latest', help='Sapiens trained model name')
 @click.option('--iterations', type=int, default=1, help='Run Sapiens given number of times to discover more humanizing mutations')
 @click.option('--scheme', default=HumanizationParams.cdr_definition, help=f'Numbering scheme: one of {", ".join(SUPPORTED_SCHEMES)}')
 @click.option('--cdr-definition', default=HumanizationParams.cdr_definition, help=f'CDR definition: one of {", ".join(SUPPORTED_CDR_DEFINITIONS)}')
 @click.option('--humanize-cdrs', is_flag=True, default=False, type=bool, help='Allow humanizing mutations in CDRs')
 @click.option('--limit', required=False, metavar='N', type=int, help='Process only first N records')
-def sapiens(inputs, output, fasta_only, scores_only, mean_score_only, version, iterations, scheme, cdr_definition, humanize_cdrs, limit, oas_db):
+def sapiens(inputs, output, fasta_only, scores_only, mean_score_only, version, iterations, scheme, cdr_definition, humanize_cdrs, limit, oasis_db):
     """Sapiens: Antibody humanization using deep learning.
 
      Sapiens is trained on 20 million natural antibody sequences
@@ -50,7 +50,7 @@ def sapiens(inputs, output, fasta_only, scores_only, mean_score_only, version, i
         \b
         # Humanize FASTA file(s), save to directory along with OASis humanness report
         biophi sapiens input.fa --output ./report/ \\
-          --oas-db sqlite:////Absolute/path/to/oas_human_subject_9mers_2019_11.db
+          --oasis-db sqlite:////Absolute/path/to/oas_human_subject_9mers_2019_11.db
 
     INPUTS: Input FASTA file path(s). If not provided, creates an interactive session.
     """
@@ -60,7 +60,7 @@ def sapiens(inputs, output, fasta_only, scores_only, mean_score_only, version, i
    \___ \ / _` | '_ \| |/ _ \ '_ \/ __|
     ___| | |_| | |_| | |  __/ | | \__ \\
    |____/ \__,_|  __/|_|\___|_| |_|___/
-               |_| ''')
+               |_|                    ''')
 
     click.echo(f'Settings:', err=True)
     click.echo(f'- Predicting using Sapiens model: {version}', err=True)
@@ -84,9 +84,9 @@ def sapiens(inputs, output, fasta_only, scores_only, mean_score_only, version, i
         iterations=iterations
     )
     oasis_params = OASisParams(
-        oasis_db_path=oas_db,
+        oasis_db_path=oasis_db,
         min_fraction_subjects=0.10
-    ) if oas_db else None
+    ) if oasis_db else None
 
     if inputs:
         if scores_only or mean_score_only:
@@ -210,7 +210,10 @@ def sapiens_fasta_only(inputs, output_fasta, humanization_params, limit=None):
 
 def sapiens_full(inputs, output_dir, humanization_params, oasis_params, limit=None):
     if oasis_params is None:
-        raise ValueError('OASis params need to be provided for full output, or consider using --fasta-only')
+        raise ValueError('Use --oasis-db PATH_TO_OASIS.db to get full output, or consider using --fasta-only')
+    if output_dir is None:
+        raise ValueError('Use --output mydir/ to specify the output directory')
+
     if not os.path.exists(output_dir) or not os.path.isdir(output_dir):
         os.mkdir(output_dir)
     if len(os.listdir(output_dir)):

@@ -30,7 +30,7 @@ you will need to download the OASis database (22GB uncompressed).
 If you have [Docker](https://www.docker.com/products/docker-desktop), 
 you can run a simplified BioPhi server using:
 ```bash
-docker run TBD
+docker run [TO DO]
 ```
 
 ### 2b. Run simplified server using Conda
@@ -49,8 +49,9 @@ conda install biophi
 biophi web
 ```
 
-**Note:** This is simplified usage for local use only. See Deploying your own BioPhi server *(TODO LINK)* to learn about 
-deploying BioPhi properly on a server.
+**Note:** This is simplified usage for local use only. 
+See [Deploying your own BioPhi server](#deploying-your-own-biophi-server) section below 
+to learn about deploying BioPhi properly on a server.
 
 </details>
 
@@ -62,7 +63,26 @@ BioPhi also provides a command-line interface that enables bulk processing.
     <summary>See more</summary>
 
 ```bash
-TBD
+# Get humanized FASTA
+# Expected input: Both chains of each antibody should have the same ID
+#                 with an optional _VL/_VH or _HC/_LC suffix
+biophi sapiens mabs.fa --fasta-only --output humanized.fa
+
+# Run full humanization & humanness evaluation pipeline
+biophi sapiens mabs.fa \
+    --oasis-db path/to/downloaded/OASis_9mers_v1.db \
+    --output humanized/
+
+# Get the Sapiens probability matrix (score of each residue at each position)
+biophi sapiens mabs.fa --scores-only --output scores.csv
+
+# Get mean Sapiens score (one score for each sequence)
+biophi sapiens mabs.fa --mean-score-only --output scores.csv
+
+# Get OASis humanness evaluation
+biophi oasis mabs.fa \
+    --oasis-db path/to/downloaded/OASis_9mers_v1.db \
+    --output oasis.xlsx
 ```
   
 </details>
