@@ -92,12 +92,20 @@
     cursor: default;
 }
 
-.designer-line a:not([href]) {
-    cursor: default;
-}
 
-.designer-line:not(.designer-parental-line) a:not(:hover):not(.aa-match) {
-    background: white !important;
+.designer-line a, .designer-line span {
+    position: relative;
+    display: inline-block;
+    height: 21px;
+    line-height: 20px;
+    font-size: 13.5px;
+    width: 8.5px;
+    box-sizing: content-box;
+    vertical-align: top;
+    text-align: center;
+    text-decoration: none;
+    color: #000000;
+    position: relative;
 }
 
 .designer-line a[href]:hover, .designer-line.designer-result-line span:hover, .designer-line .active {

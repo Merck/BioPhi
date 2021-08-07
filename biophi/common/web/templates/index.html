@@ -2,7 +2,7 @@
 
 {% block header %}
   {% if not oasis_enabled %}
-    <div class="bg-warning text-dark p-2">OASis DB path is not configured, OASis peptide humanness evaluation will not be available.</div>
+    <div class="bg-warning text-dark p-2">OASIS_DB_PATH is not configured, OASis peptide humanness evaluation will not be available.</div>
   {% endif %}
   <div id="header">
     <div class="container">
@@ -47,7 +47,7 @@
 <div class="container">
   <div class="row gx-5 mb-5">
     <div class="col-lg-7 col-md-8">
-      <h1 class="display-6 mb-3">News</h1>
+      <h1 class="fs-2 fw-light mb-3">News</h1>
       <div class="list-group list-group-flush" id="news">
         {% for item in news[:5] %}
         <div class="list-group-item">
@@ -59,7 +59,7 @@
         </div>
         {% endfor %}
       </div>
-      <h1 class="display-6 mb-3 mt-3">Acknowledgements</h1>
+      <h1 class="fs-2 fw-light mb-3 mt-3">Acknowledgements</h1>
       <p>If you use BioPhi, please cite:</p>
       <p>TBD</p>
       <p>BioPhi is based on antibody repertoires from the <a href="http://opig.stats.ox.ac.uk/webapps/oas/" target="_blank">Observed Antibody Space</a> database.</p>
@@ -68,15 +68,14 @@
     </div>
 
     <div class="col-lg-5 col-md-4">
-      <h1 class="display-6 mb-3">Contributing</h1>
+      <h1 class="fs-2 fw-light mb-3">Contributing</h1>
       <p>
         BioPhi is an open-source platform,
         please feel free to <a target="_blank" href="https://github.com/Merck/BioPhi/issues">submit a ticket</a> to report any issues or to propose new features.
       </p>
       <p>Developers are welcome to contribute directly to BioPhi code, learn more in our <a target="_blank" href="https://github.com/Merck/BioPhi/issues">GitHub repository</a>.</p>
-      <div class="text-end">
-        <a href="https://twitter.com/BioPhi?ref_src=twsrc%5Etfw" class="invisible twitter-follow-button" data-dnt="true" data-show-count="false">Follow @BioPhi</a>
-      </div>
+      <p>Follow BioPhi on Twitter to get the latest news:</p>
+      <a href="https://twitter.com/BioPhi?ref_src=twsrc%5Etfw" class="invisible twitter-follow-button" data-dnt="true" data-show-count="false">Follow @BioPhi</a>
       <a class="invisible twitter-timeline" data-height="600" data-dnt="true" href="https://twitter.com/BioPhi?ref_src=twsrc%5Etfw">Tweets by BioPhi</a>
       <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
     </div>

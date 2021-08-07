@@ -12,13 +12,13 @@
 {% block main %}
 
 <div class="mb-3 mt-3 row">
-  <div class="col-8">
+  <div class="col-3">
     <a class="btn btn-light" href="{{ url_for('biophi_humanization.humanize_get') }}">
       {{ icon('chevron-left') }} Input
     </a>
   </div>
 
-  <div class="col-4 text-end">
+  <div class="col-9 text-end">
     {% if show == 'alignments' %}
         <a class="btn btn-light" href="{{ url_for_arg(show='table') }}">{{ icon('table') }} Show table</a>
     {% else %}
@@ -26,7 +26,7 @@
     {% endif %}
     <div class="d-inline-block">
       <a class="btn btn-light" href="{{ url_for('biophi_humanization.humanize_get', humanize_task_id=task_id) }}">
-        {{ icon('arrow-repeat') }} Re-run
+        {{ icon('arrow-repeat') }} Change settings
       </a>
     </div>
     <div class="dropdown d-inline-block">

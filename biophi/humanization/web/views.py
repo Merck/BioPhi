@@ -294,7 +294,8 @@ def designer_detail_get(task_id):
     aa = request.args.get('aa')
 
     try:
-        result: HumanizeAntibodyTaskResult = scheduler.get_result(task_id, timeout=15)
+        timeout = 15 if pos and aa else 5
+        result: HumanizeAntibodyTaskResult = scheduler.get_result(task_id, timeout=timeout)
     except TimeoutError:
         return render_template('loading.html', active_nav='designer')
 

@@ -155,7 +155,8 @@
     %}<span data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-html="true" data-tooltip-classes="tooltip-medium" data-result-pos="{{ pos }}"
             class="{% if aa != parental_humanness.chain[pos] %}designer-mut{% endif %} {% if not freqs or freqs.get(aa, 0) < RARE_FAMILY_FREQ %}oasis-seq-aa-rare{% endif %}"
              title="Result {{ pos_tooltip(pos) }}<br>{{ aa_name(aa) }}<br>Click to enter mutation"
-            style="background-color: rgb(255, {{ 255 - num_non_human**0.80 * 30 }}, {{ 255 - num_non_human**0.65 * 40 }});">{{ aa }}</span>{%
+            style="background-color: rgb(255, {{ 255 - num_non_human**0.80 * 30 }}, {{ 255 - num_non_human**0.65 * 40 }});"
+          >{{ aa }}</span>{%
     endfor %}
     Result
   </div>
@@ -186,18 +187,17 @@
     <div class="tab-pane {% if not tab or tab == 'sapiens' %}show active{% endif %}" id="pills-sapiens-{{ id }}" role="tabpanel" aria-labelledby="pills-sapiens-tab-{{ id }}">
       <div class="mb-2 font-monospace text-nowrap fs-smaller">
         {% for scores in humanization.get_top_scores(5, next=True) %}
-          <div class="hum-designer-scores designer-line">
+          <div class="suggested-mutations designer-line">
             {% for pos, aa, score in scores
             %}{% if score > MIN_SAPIENS_SCORE %}<a
                   {% if aa != humanized_humanness.chain[pos] %} href="{{ url_for_arg(pos=pos, aa=aa, tab='sapiens', relative=True) }}" data-pos="{{ pos }}" {% endif %}
                   data-bs-toggle="tooltip" data-bs-html="true" data-bs-placement="bottom"
                   title="{{ mutation_tooltip(pos, humanized_humanness.chain[pos], aa) }}
                   <br>{{ '{:.0%}'.format(score) }} Sapiens score"
-                   {% if humanized_humanness.chain[pos] == aa %}class="aa-match"{% endif %}
                   style="background: rgb({{255-score**0.5*100}},{{255-score**0.5*150}},{{255}});"
-            >{{aa}}</a>{% else %}<span></span>{% endif %}{%
+            >{{ aa if humanized_humanness.chain[pos] != aa else '·' }}</a>{% else %}<span></span>{% endif %}{%
             endfor %}
-            #{{ loop.index }} Sapiens score
+            Top #{{ loop.index }} score
           </div>
         {% endfor %}
       </div>
@@ -205,17 +205,17 @@
     <div class="tab-pane {% if tab == 'freq' %}show active{% endif %}" id="pills-freq-{{ id }}" role="tabpanel" aria-labelledby="pills-freq-tab-{{ id }}">
       <div class="mb-2 font-monospace text-nowrap fs-smaller">
         {% for freqs in humanized_humanness.get_top_freqs(5) %}
-          <div class="hum-designer-scores designer-line">
+          <div class="suggested-mutations designer-line">
             {% for pos, aa, freq in freqs
             %}{% if freq > MIN_FAMILY_FREQ %}<a
                   {% if aa != humanized_humanness.chain[pos] %} href="{{ url_for_arg(pos=pos, aa=aa, tab='freq', relative=True) }}" data-pos="{{ pos }}" {% endif %}
                   data-bs-toggle="tooltip" data-bs-html="true" data-bs-placement="bottom"
                   title="{{ mutation_tooltip(pos, humanized_humanness.chain[pos], aa) }}
                   <br>{{ '{:.0%}'.format(freq) }} frequency in {{ humanized_humanness.v_germline_family }}"
-                   {% if humanized_humanness.chain[pos] == aa %}class="aa-match"{% endif %}
-                  style="background: rgb({{255-freq**0.5*255}},{{255-freq**0.5*100}},{{255-freq**0.5*100}});">{{ aa }}</a>{% else %}<span></span>{% endif %}{%
+                  style="background: rgb({{255-freq**0.5*255}},{{255-freq**0.5*100}},{{255-freq**0.5*100}});"
+                >{{ aa if humanized_humanness.chain[pos] != aa else '·' }}</a>{% else %}<span></span>{% endif %}{%
             endfor %}
-            #{{ loop.index }} at germline position
+            Top #{{ loop.index }} frequency
           </div>
         {% endfor %}
       </div>
@@ -230,8 +230,8 @@
               %}{% set germline_aa = v_germlines[i][imgt_pos] or j_germlines[i][imgt_pos] or '-' %}<a
                     data-bs-toggle="tooltip" data-bs-html="true" data-bs-placement="bottom" title="{{ mutation_tooltip(pos, seq_aa, germline_aa) }}"
                     {% if germline_aa != "-" and germline_aa != seq_aa %} href="{{ url_for_arg(pos=pos, aa=germline_aa, tab='germline', relative=True) }}" data-pos="{{ pos }}"{% endif %}
-                    {% if seq_aa == germline_aa %}class="aa-match"{% endif %}
-                    style="background: #b3f7b3; {% if pos.is_in_cdr() %}opacity: 0.6;{% endif %}">{{ germline_aa }}</a>{%
+                    style="background:rgb(200, 255, 200); {% if pos.is_in_cdr() %}opacity: 0.6;{% endif %}"
+                >{{ germline_aa if humanized_humanness.chain[pos] != germline_aa else '·' }}</a>{%
               endfor %}
               {{ v_germlines[i].name }}, {{ j_germlines[i].name }}
             </div>
