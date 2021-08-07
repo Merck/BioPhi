@@ -23,17 +23,17 @@ If you don't want to use the [public BioPhi server](http://biophi.dichlab.org), 
 ### 1. Download OASis database
 
 To run BioPhi with OASis humanness evaluation locally, 
-you will need to download the OASis database (22GB uncompressed).
+you will need to download and unzip the
+[OASis database file (22GB uncompressed)](https://zenodo.org/record/5164685).
 
-### 2a. Run simplified server using Docker
-
-If you have [Docker](https://www.docker.com/products/docker-desktop), 
-you can run a simplified BioPhi server using:
 ```bash
-docker run [TO DO]
+# Download database file
+wget https://zenodo.org/record/5164685/files/OASis_9mers_v1.db.gz
+# Unzip
+gunzip OASis_9mers_v1.db.gz
 ```
 
-### 2b. Run simplified server using Conda
+### 2a. Run simplified server using Conda
 
 You can also install BioPhi using [Bioconda](https://bioconda.github.io/user/install.html):
 
@@ -43,7 +43,10 @@ conda create -n biophi python=3.8
 conda activate biophi
 
 # Install BioPhi
-conda install biophi
+conda install -c bioconda biophi
+
+# Set up path to OASis database (downloaded and unzipped)
+export OASIS_DB_PATH=/path/to/downloaded/OASis_9mers_v1.db
 
 # Run simplified BioPhi server (not for live deployment!)
 biophi web
@@ -52,6 +55,15 @@ biophi web
 **Note:** This is simplified usage for local use only. 
 See [Deploying your own BioPhi server](#deploying-your-own-biophi-server) section below 
 to learn about deploying BioPhi properly on a server.
+
+
+### 2b. Run simplified server using Docker
+
+If you have [Docker](https://www.docker.com/products/docker-desktop), 
+you can run a simplified BioPhi server using:
+```bash
+docker run [TBD, Work in progress]
+```
 
 </details>
 
