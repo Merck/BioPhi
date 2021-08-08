@@ -35,6 +35,9 @@ gunzip OASis_9mers_v1.db.gz
 
 ### 2a. Run simplified server using Conda
 
+**❗️NOTE: Bioconda distribution is in progress. 
+Please see [Development](#development) section below to set up BioPhi using this GitHub repository instead.**
+
 You can also install BioPhi using [Bioconda](https://bioconda.github.io/user/install.html):
 
 ```bash
@@ -58,6 +61,9 @@ to learn about deploying BioPhi properly on a server.
 
 
 ### 2b. Run simplified server using Docker
+
+**❗️NOTE: Docker distribution is in progress. 
+Please see [Development](#development) section below to set up BioPhi using this GitHub repository instead.**
 
 If you have [Docker](https://www.docker.com/products/docker-desktop), 
 you can run a simplified BioPhi server using:
