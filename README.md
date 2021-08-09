@@ -11,7 +11,8 @@ BioPhi is available at: [http://biophi.dichlab.org](http://biophi.dichlab.org)
 
 Learn more in the BioPhi, Sapiens and OASis in our pre-print:
 
-> TBD
+> Prihoda, D., Maamary, J., Waight, A., Juan, V., Fayadat-Dilman, L., Svozil, D., & Bitton, D. A. (2021). 
+> BioPhi: A platform for antibody design, humanization and humanness evaluation based on natural antibody repertoires and deep learning. BioRxiv, 2021.08.08.455394. https://doi.org/10.1101/2021.08.08.455394
 
 ## Running BioPhi on your machine
 
