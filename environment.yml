@@ -15,5 +15,5 @@ dependencies:
     - requests
     - tqdm
     - xlsxwriter
-    - flask-humanize
+    - humanize
     - fairseq == 0.10.2

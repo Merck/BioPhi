@@ -129,7 +129,7 @@ so you will have to restart the services after each code update.
 
 #### 1. Install Docker
 
-See https://docs.docker.com/docker-for-mac/install/
+See https://docs.docker.com/get-docker/
 
 #### 2. Build all images using Docker Compose
 
@@ -190,9 +190,9 @@ On Mac, you can [install Redis using Brew](https://medium.com/@petehouston/insta
 # Install dependencies using the provided Makefile
 make env
 # Or directly using
-conda env create -n biophi-dev -f environment.yml
-conda activate biophi-dev
-pip install -e .
+conda env create -n biophi -f environment.yml
+conda activate biophi
+pip install -e . --no-deps
 ```
 
 #### 4. Run all services

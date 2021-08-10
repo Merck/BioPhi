@@ -53,7 +53,7 @@
         <div class="list-group-item">
           <div class="d-flex w-100 justify-content-between">
             <h5 class="mb-1">{{ item.title }}</h5>
-            <small>{{ item.date | humanize() }}</small>
+            <small>{{ item.date | naturalday }}</small>
           </div>
           <p class="mb-1">{{ item.body | safe }}</p>
         </div>

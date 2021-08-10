@@ -1,7 +1,8 @@
 import datetime
 import json
+
+import humanize
 from Bio.SeqUtils import seq3
-from flask_humanize import Humanize
 import pandas as pd
 from markupsafe import Markup
 from werkzeug.urls import url_encode
@@ -44,9 +45,6 @@ app.jinja_env.globals.update(sorted=sorted)
 app.jinja_env.globals.update(min=min)
 app.jinja_env.globals.update(max=max)
 
-
-# Enable human-readable date functions
-humanize = Humanize(app)
 
 app.register_blueprint(biophi_humanization, url_prefix='/humanization')
 
@@ -126,6 +124,16 @@ def info_icon(text, filled=False, secondary=True, delay=100, s=16):
     name = 'info-circle-fill' if filled else 'info-circle'
     return Markup(f'<span class="{"text-secondary" if secondary else ""}" data-tooltip-classes="tooltip-wide" '
                   f'data-bs-delay="{delay}" data-bs-toggle="tooltip" title="{text}">{icon(name, s=s)}</span>')
+
+
+@app.template_filter()
+def naturalday(v):
+    return humanize.naturalday(v)
+
+
+@app.template_filter()
+def naturaltime(v):
+    return humanize.naturaltime(v)
 
 
 @app.template_global()

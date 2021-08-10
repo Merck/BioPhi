@@ -76,7 +76,7 @@
    <div class="col-4">
       <p class="lead">Last request errors</p>
       {% for i, row in access_log[access_log['exception'].isna() == False][::-1].head().iterrows() %}
-        <div class="text-danger fs-smaller">{{ row.name | humanize() }}: {{ row['exception'][:50] + ('...' if (row['exception'] | length) > 50 else '') }}</div>
+        <div class="text-danger fs-smaller">{{ row.name | naturaltime }}: {{ row['exception'][:50] + ('...' if (row['exception'] | length) > 50 else '') }}</div>
       {% endfor %}
    </div>
    <div class="col-5">
@@ -92,7 +92,7 @@
    <div class="col-4">
       <p class="lead">Last task errors</p>
       {% for i, row in task_log[task_log['exception'].isna() == False][::-1].head().iterrows() %}
-        <div class="text-danger fs-smaller">{{ row.name | humanize() }}: {{ row['exception'][:50] + ('...' if (row['exception'] | length) > 50 else '') }}</div>
+        <div class="text-danger fs-smaller">{{ row.name | naturaltime }}: {{ row['exception'][:50] + ('...' if (row['exception'] | length) > 50 else '') }}</div>
       {% endfor %}
    </div>
    <div class="col-5">
@@ -114,7 +114,7 @@
         </div>
       </div>
       <div class="col-{{ key_width }} fs-smaller">
-        {{ key | humanize() }}
+        {{ key | naturaltime }}
       </div>
     </div>
     {% endfor %}
