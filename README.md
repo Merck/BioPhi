@@ -36,10 +36,9 @@ gunzip OASis_9mers_v1.db.gz
 
 ### 2a. Run simplified server using Conda
 
-**❗️NOTE: Bioconda distribution is in progress. 
-Please see [Development](#development) section below to set up BioPhi using this GitHub repository instead.**
-
-You can also install BioPhi using [Bioconda](https://bioconda.github.io/user/install.html):
+You can install BioPhi using [Conda](https://docs.conda.io/projects/conda/en/latest/user-guide/install/download.html) 
+or one of the alternatives ([Miniconda](https://docs.conda.io/en/latest/miniconda.html), 
+[Miniforge](https://github.com/conda-forge/miniforge)).
 
 ```bash
 # Recommended: Create a separate BioPhi environment
