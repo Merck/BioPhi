@@ -14,6 +14,13 @@ Learn more in the BioPhi, Sapiens and OASis in our pre-print:
 > Prihoda, D., Maamary, J., Waight, A., Juan, V., Fayadat-Dilman, L., Svozil, D., & Bitton, D. A. (2021). 
 > BioPhi: A platform for antibody design, humanization and humanness evaluation based on natural antibody repertoires and deep learning. BioRxiv, 2021.08.08.455394. https://doi.org/10.1101/2021.08.08.455394
 
+## Contributing
+
+BioPhi is an open and extensible platform, contributions are welcome. 
+
+If you have ideas about what to improve or which tools could be integrated, please submit
+any feature requests using the [Issues](https://github.com/Merck/biophi/issues) tab.
+
 ## Running BioPhi on your machine
 
 If you don't want to use the [public BioPhi server](http://biophi.dichlab.org), you can run BioPhi on your own machine.
@@ -51,8 +58,6 @@ conda install -c bioconda biophi
 <details>
 <summary>See more</summary>
 
-#### Run simplified server using Conda
-
 ```bash
 # Set up path to OASis database (downloaded and unzipped)
 export OASIS_DB_PATH=/path/to/downloaded/OASis_9mers_v1.db
@@ -64,20 +69,6 @@ biophi web
 **Note:** This is simplified usage for local use only. 
 See [Deploying your own BioPhi server](#deploying-your-own-biophi-server) section below 
 to learn about deploying BioPhi properly on a server.
-
-
-#### Run simplified server using Docker
-
-**❗️NOTE: Docker distribution is in progress. 
-Please see [Development](#development) section below to set up BioPhi using this GitHub repository instead.**
-
-If you have [Docker](https://www.docker.com/products/docker-desktop), 
-you can run a simplified BioPhi server using:
-```bash
-docker run [TBD, Work in progress]
-```
-
-</details>
 
 ## BioPhi command-line interface
 
@@ -110,11 +101,6 @@ biophi oasis mabs.fa \
 ```
   
 </details>
-
-## Contributing
-
-BioPhi is an open and extensible platform, contributions are welcome. 
-Submit any feature requests on the [Issues](https://github.com/Merck/biophi/issues) page.
 
 ## Development
 
