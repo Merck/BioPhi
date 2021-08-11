@@ -18,9 +18,6 @@ Learn more in the BioPhi, Sapiens and OASis in our pre-print:
 
 If you don't want to use the [public BioPhi server](http://biophi.dichlab.org), you can run BioPhi on your own machine.
 
-<details>
-<summary>See more</summary>
-
 ### 1. Download OASis database
 
 To run BioPhi with OASis humanness evaluation locally, 
@@ -34,7 +31,7 @@ wget https://zenodo.org/record/5164685/files/OASis_9mers_v1.db.gz
 gunzip OASis_9mers_v1.db.gz
 ```
 
-### 2a. Run simplified server using Conda
+### 2. Install BioPhi from Bioconda
 
 You can install BioPhi using [Conda](https://docs.conda.io/projects/conda/en/latest/user-guide/install/download.html) 
 or one of the alternatives ([Miniconda](https://docs.conda.io/en/latest/miniconda.html), 
@@ -47,7 +44,16 @@ conda activate biophi
 
 # Install BioPhi
 conda install -c bioconda biophi
+```
 
+### 3. Run simplified server
+
+<details>
+<summary>See more</summary>
+
+#### Run simplified server using Conda
+
+```bash
 # Set up path to OASis database (downloaded and unzipped)
 export OASIS_DB_PATH=/path/to/downloaded/OASis_9mers_v1.db
 
@@ -60,7 +66,7 @@ See [Deploying your own BioPhi server](#deploying-your-own-biophi-server) sectio
 to learn about deploying BioPhi properly on a server.
 
 
-### 2b. Run simplified server using Docker
+#### Run simplified server using Docker
 
 **❗️NOTE: Docker distribution is in progress. 
 Please see [Development](#development) section below to set up BioPhi using this GitHub repository instead.**
