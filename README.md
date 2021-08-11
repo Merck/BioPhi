@@ -55,9 +55,6 @@ conda install -c bioconda biophi
 
 ### 3. Run simplified server
 
-<details>
-<summary>See more</summary>
-
 ```bash
 # Set up path to OASis database (downloaded and unzipped)
 export OASIS_DB_PATH=/path/to/downloaded/OASis_9mers_v1.db
