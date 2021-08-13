@@ -3,9 +3,6 @@ FROM continuumio/miniconda
 RUN apt-get update -y && apt-get install -y --no-install-recommends \
         build-essential
 
-RUN conda config --add channels bioconda \
-    && conda config --add channels conda-forge
-
 WORKDIR /opt/biophi
 
 COPY environment.yml .

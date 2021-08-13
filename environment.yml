@@ -1,4 +1,8 @@
----
+channels:
+  - defaults
+  - bioconda
+  - anaconda
+  - conda-forge
 dependencies:
   - python = 3.8
   - pip
