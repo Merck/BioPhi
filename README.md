@@ -6,8 +6,8 @@
     <a href="https://github.com/Merck/BioPhi/actions/workflows/python-package-conda.yml">
     <img src="https://github.com/Merck/BioPhi/actions/workflows/python-package-conda.yml/badge.svg"
         alt="Build & Test"></a>
-    <a href="https://anaconda.org/bioconda/deepbgc">
-        <img src="https://img.shields.io/conda/dn/bioconda/deepbgc.svg?style=flag&label=BioConda%20install&color=green"
+    <a href="https://anaconda.org/bioconda/biophi">
+        <img src="https://img.shields.io/conda/dn/bioconda/biophi.svg?style=flag&label=BioConda%20install&color=green"
             alt="BioConda Install"></a>
     <a href="https://github.com/Merck/BioPhi/releases">
         <img src="https://img.shields.io/github/v/release/Merck/BioPhi?include_prereleases"

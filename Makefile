@@ -16,7 +16,9 @@ env-setup:
 
 pytest:
 	$(CONDA_ACTIVATE); \
-        biophi -h; \
+        biophi --help; \
+        biophi sapiens --help; \
+        biophi oasis --help; \
         pytest tests/pytest
 
 docker-build:
