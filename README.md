@@ -229,6 +229,8 @@ the celery worker and the redis database.
 This will depend on your platform and your cloud provider, the easiest deployment is using [Docker Compose](https://docs.docker.com/compose/gettingstarted/)
 through the provided [docker-compose.yml](docker-compose.yml) file.
 
+For 🐧 Ubuntu deployment, feel free to copy the deployment configs used on the public university server: [lich-uct/biophi.dichlab.org](https://github.com/lich-uct/biophi.dichlab.org)
+
 ## Acknowledgements
 
 BioPhi is based on antibody repertoires from the Observed Antibody Space:
