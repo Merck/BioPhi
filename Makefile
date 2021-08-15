@@ -14,6 +14,11 @@ env-update: environment.yml
 env-setup:
 	$(CONDA_ACTIVATE); pip install -e .
 
+pytest:
+	$(CONDA_ACTIVATE); \
+        biophi -h; \
+        pytest tests/pytest
+
 docker-build:
 	docker-compose build
 
