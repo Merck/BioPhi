@@ -11,19 +11,13 @@ services:
     command: flask run --host=0.0.0.0
     depends_on:
       - redis
-      - mongo
     environment:
       - FLASK_ENV=development
       - FLASK_APP=biophi.common.web.views
       - CELERY_BROKER_URL=redis://redis:6379/0
       - CELERY_RESULT_BACKEND=redis://redis:6379/0
-      - SESSION_REDIS_URL=redis://redis:6379/1
-      - MONGODB_HOST=mongo
       - HTTP_PROXY
       - HTTPS_PROXY
-      - AUTH_ENABLED
-      - BIOPHI_CLIENT_ID
-      - BIOPHI_CLIENT_SECRET
   # Redis provides the Redis in-memory database that serves as queue for Celery tasks
   redis:
     image: redis
@@ -38,10 +32,8 @@ services:
       - FLASK_ENV=development
       - CELERY_BROKER_URL=redis://redis:6379/0
       - CELERY_RESULT_BACKEND=redis://redis:6379/0
-      - MONGODB_HOST=mongo
       - HTTP_PROXY
       - HTTPS_PROXY
     command: celery -A biophi.common.web.tasks.celery worker --loglevel=INFO
     depends_on:
       - redis
-      - mongo
