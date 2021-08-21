@@ -1,4 +1,4 @@
-FROM continuumio/miniconda
+FROM continuumio/miniconda3
 
 RUN apt-get update -y && apt-get install -y --no-install-recommends \
         build-essential
