@@ -57,13 +57,22 @@ You can install BioPhi using [Conda](https://docs.conda.io/projects/conda/en/lat
 or one of the alternatives ([Miniconda](https://docs.conda.io/en/latest/miniconda.html), 
 [Miniforge](https://github.com/conda-forge/miniforge)).
 
+Set up Bioconda and Conda-Forge channels:
+
+```bash
+conda config --add channels bioconda
+conda config --add channels conda-forge
+```
+
+Install BioPhi using:
+
 ```bash
 # Recommended: Create a separate BioPhi environment
 conda create -n biophi python=3.8
 conda activate biophi
 
 # Install BioPhi
-conda install -c bioconda biophi
+conda install biophi
 ```
 
 ### 3. Run simplified server
