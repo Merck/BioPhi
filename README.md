@@ -27,6 +27,8 @@ Learn more in the BioPhi, Sapiens and OASis in our pre-print:
 > Prihoda, D., Maamary, J., Waight, A., Juan, V., Fayadat-Dilman, L., Svozil, D., & Bitton, D. A. (2021). 
 > BioPhi: A platform for antibody design, humanization and humanness evaluation based on natural antibody repertoires and deep learning. BioRxiv, 2021.08.08.455394. https://doi.org/10.1101/2021.08.08.455394
 
+The data and notebooks supporting the analysis are found in: https://github.com/Merck/BioPhi-2021-publication
+
 ## Contributing
 
 BioPhi is an open and extensible platform, contributions are welcome. 
