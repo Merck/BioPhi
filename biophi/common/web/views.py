@@ -31,7 +31,7 @@ app.config.update(dict(
     PRESERVE_CONTEXT_ON_EXCEPTION=False,
     # Show newsletter popup at the bottom of landing page
     # using provided user/newsletter ID (something like c7bcd0367a4cdbbfe2ef413ff/c5b4d513538dcdb730f72a9db)
-    MAILCHIMP_NEWSLETTER=bool(int(os.environ.get('MAILCHIMP_NEWSLETTER'))),
+    MAILCHIMP_NEWSLETTER=os.environ.get('MAILCHIMP_NEWSLETTER'),
 ))
 
 app.jinja_env.globals.update(aa_name=aa_name)
