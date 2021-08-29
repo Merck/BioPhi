@@ -28,7 +28,10 @@ app.config.update(dict(
     OASIS_DB_PATH=os.environ.get('OASIS_DB_PATH'),
     # Destroy context on exception even in Debug mode, so that we can log the exception to the stats DB
     # This makes sure that teardown_request is called in debug mode when getting an exception in the endpoint
-    PRESERVE_CONTEXT_ON_EXCEPTION=False
+    PRESERVE_CONTEXT_ON_EXCEPTION=False,
+    # Show newsletter popup at the bottom of landing page
+    # using provided user/newsletter ID (something like c7bcd0367a4cdbbfe2ef413ff/c5b4d513538dcdb730f72a9db)
+    MAILCHIMP_NEWSLETTER=bool(int(os.environ.get('MAILCHIMP_NEWSLETTER'))),
 ))
 
 app.jinja_env.globals.update(aa_name=aa_name)
@@ -93,7 +96,9 @@ def index():
     for item in news:
         item['date'] = datetime.datetime.fromisoformat(item['date'])
     oasis_enabled = app.config['OASIS_DB_PATH'] is not None
-    return render_template('index.html', total=1, news=news, oasis_enabled=oasis_enabled)
+    mailchimp_newsletter = app.config['MAILCHIMP_NEWSLETTER']
+    return render_template('index.html', news=news,
+                           oasis_enabled=oasis_enabled, mailchimp_newsletter=mailchimp_newsletter)
 
 
 @app.route('/stats')
