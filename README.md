@@ -29,6 +29,12 @@ Learn more in the BioPhi, Sapiens and OASis in our pre-print:
 
 The data and notebooks supporting the analysis are found in: https://github.com/Merck/BioPhi-2021-publication
 
+## Intro video
+
+<a href="http://www.youtube.com/watch?v=JNfU4cR1hgI" target="_blank" title="BioPhi Intro Video">
+    <img src="https://biophi.dichlab.org/static/img/preview.png" alt="BioPhi Intro Video" height="350">
+</a>
+
 ## Contributing
 
 BioPhi is an open and extensible platform, contributions are welcome. 
