@@ -13,33 +13,13 @@ from biophi.common.utils.scheduler import use_scheduler, TaskNotFoundError
 from biophi.common.utils.stats import get_stats, log_access
 from biophi.humanization.web.views import biophi_humanization
 from flask_session import Session
-import redis
 
 
 app = Flask(__name__)
 
 app.secret_key = 'gijo080)Q@%0h8q808th0018020ahofijvvi018a-b8n8881244o09g-fff221111ttgj09s'
 
-app.config.update(dict(
-    # Max file upload size in bytes
-    MAX_CONTENT_LENGTH=int(os.environ.get('MAX_CONTENT_LENGTH', 1 * 1024 * 1024)),
-    # Maximum number of input antibodies to be processed
-    MAX_INPUTS=int(os.environ.get('MAX_INPUTS', 5000)),
-    # Path to BioPhi usage statistics sqlite database
-    STATS_DB_PATH=os.environ.get('STATS_DB_PATH'),
-    # Path to OASis sqlite database
-    OASIS_DB_PATH=os.environ.get('OASIS_DB_PATH'),
-    # Destroy context on exception even in Debug mode, so that we can log the exception to the stats DB
-    # This makes sure that teardown_request is called in debug mode when getting an exception in the endpoint
-    PRESERVE_CONTEXT_ON_EXCEPTION=False,
-    # Show newsletter popup at the bottom of landing page
-    # using provided user/newsletter ID (something like c7bcd0367a4cdbbfe2ef413ff/c5b4d513538dcdb730f72a9db)
-    MAILCHIMP_NEWSLETTER=os.environ.get('MAILCHIMP_NEWSLETTER'),
-    # Session config
-    SESSION_TYPE='redis',
-    # Store sessions in same redis DB as used in Celery
-    SESSION_REDIS=redis.from_url(os.environ.get('CELERY_RESULT_BACKEND', 'redis://localhost:6379/0')),
-))
+app.config.from_object('biophi.common.web.app_config')
 
 session = Session()
 session.init_app(app)
