@@ -20,4 +20,3 @@ dependencies:
     - xlsxwriter
     - humanize
     - fairseq == 0.10.2
-    - flask_session

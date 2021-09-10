@@ -12,7 +12,6 @@ import os
 from biophi.common.utils.scheduler import use_scheduler, TaskNotFoundError
 from biophi.common.utils.stats import get_stats, log_access
 from biophi.humanization.web.views import biophi_humanization
-from flask_session import Session
 
 
 app = Flask(__name__)
@@ -20,9 +19,6 @@ app = Flask(__name__)
 app.secret_key = 'gijo080)Q@%0h8q808th0018020ahofijvvi018a-b8n8881244o09g-fff221111ttgj09s'
 
 app.config.from_object('biophi.common.web.app_config')
-
-session = Session()
-session.init_app(app)
 
 app.jinja_env.globals.update(aa_name=aa_name)
 app.jinja_env.globals.update(seq3=seq3)
