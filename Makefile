@@ -12,7 +12,7 @@ env-update: environment.yml
 	conda env update -n $(ENV_NAME) -f $<
 
 env-setup:
-	$(CONDA_ACTIVATE); pip install -e .
+	$(CONDA_ACTIVATE); pip install -e . --no-deps
 
 pytest:
 	$(CONDA_ACTIVATE); \

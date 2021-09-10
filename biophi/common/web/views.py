@@ -12,6 +12,7 @@ import os
 from biophi.common.utils.scheduler import use_scheduler, TaskNotFoundError
 from biophi.common.utils.stats import get_stats, log_access
 from biophi.humanization.web.views import biophi_humanization
+from flask_session import Session
 
 app = Flask(__name__)
 
@@ -34,6 +35,9 @@ app.config.update(dict(
     MAILCHIMP_NEWSLETTER=os.environ.get('MAILCHIMP_NEWSLETTER'),
 ))
 
+session = Session()
+session.init_app(app)
+
 app.jinja_env.globals.update(aa_name=aa_name)
 app.jinja_env.globals.update(seq3=seq3)
 app.jinja_env.globals.update(python_set=set)
@@ -47,7 +51,6 @@ app.jinja_env.globals.update(int=int)
 app.jinja_env.globals.update(sorted=sorted)
 app.jinja_env.globals.update(min=min)
 app.jinja_env.globals.update(max=max)
-
 
 app.register_blueprint(biophi_humanization, url_prefix='/humanization')
 
