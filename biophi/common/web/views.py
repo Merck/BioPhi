@@ -98,8 +98,6 @@ def error_task_not_found(e):
 
 @app.route('/')
 def index():
-    from flask import session
-    assert False, str(session.get('username'))
     web_path = os.path.dirname(__file__)
     news_path = os.path.join(web_path, 'static', 'news.json')
     with open(news_path) as f:
