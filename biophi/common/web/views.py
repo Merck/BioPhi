@@ -13,6 +13,8 @@ from biophi.common.utils.scheduler import use_scheduler, TaskNotFoundError
 from biophi.common.utils.stats import get_stats, log_access
 from biophi.humanization.web.views import biophi_humanization
 from flask_session import Session
+import redis
+
 
 app = Flask(__name__)
 
@@ -33,6 +35,10 @@ app.config.update(dict(
     # Show newsletter popup at the bottom of landing page
     # using provided user/newsletter ID (something like c7bcd0367a4cdbbfe2ef413ff/c5b4d513538dcdb730f72a9db)
     MAILCHIMP_NEWSLETTER=os.environ.get('MAILCHIMP_NEWSLETTER'),
+    # Session config
+    SESSION_TYPE='redis',
+    # Store sessions in same redis DB as used in Celery
+    SESSION_REDIS=redis.from_url(os.environ.get('CELERY_RESULT_BACKEND', 'redis://localhost:6379/0')),
 ))
 
 session = Session()
@@ -92,6 +98,8 @@ def error_task_not_found(e):
 
 @app.route('/')
 def index():
+    from flask import session
+    assert False, str(session.get('username'))
     web_path = os.path.dirname(__file__)
     news_path = os.path.join(web_path, 'static', 'news.json')
     with open(news_path) as f:
