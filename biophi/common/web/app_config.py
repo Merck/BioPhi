@@ -1,4 +1,3 @@
-import redis
 import os
 
 # Max file upload size in bytes
