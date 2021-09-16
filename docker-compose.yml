@@ -28,12 +28,16 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+    volumes:
+      - /home/ubuntu:/home/ubuntu
     environment:
       - FLASK_ENV=development
       - CELERY_BROKER_URL=redis://redis:6379/0
       - CELERY_RESULT_BACKEND=redis://redis:6379/0
       - HTTP_PROXY
       - HTTPS_PROXY
+      - OASIS_DB_PATH=/home/ubuntu/OASis_9mers_v1.db
     command: celery -A biophi.common.web.tasks.celery worker --loglevel=INFO
     depends_on:
       - redis
+

@@ -158,7 +158,23 @@ make docker-build
 docker-compose build
 ```
 
-#### 3. Run all services using Docker Compose
+#### 3. Mount OASis database through Docker
+
+Edit `docker-compose.yml` so the Docker container has the environment variable describing the path to the OASis database file *in the container* (not the host machine):
+```bash
+worker:
+    environment:
+        - OASIS_DB_PATH=/app/OASis_9mers_v1.db
+```
+
+Mount the directory containing the OASis database file. The first part of the field is the name of the volume on the host machine. THe second part of the field is the path where the directory is mounted in the countainer. For example, if you downloaded `OASis_9mers_v1.db` to your local machine at `/home/downloads`, you could do the following, in conjunction with the above `environment` syntax:
+```
+worker:
+    volumes:
+        - /home/downloads:/app
+```
+
+#### 4. Run all services using Docker Compose
 
 ```bash
 # Run using Makefile
