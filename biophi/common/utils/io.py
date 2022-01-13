@@ -375,6 +375,31 @@ def send_fasta(records, name, timestamp=True):
     return send_text(stringio.getvalue(), name=name, extension='fa', timestamp=timestamp)
 
 
+def shorten_sheet_names(names_orig, max_length=27, max_iter=25):
+    suffixes = [0] * len(names_orig)
+    names_final = [name[:max_length] for name in names_orig]
+    iteration = 0
+    while len(set(names_final)) < len(names_final) and iteration < max_iter:
+        iteration += 1
+        used = {}
+        for i, name in enumerate(names_final):
+            if names_final.count(name) > 1:
+                number = used.get(name, 0) + 1
+                used[name] = number
+                suffixes[i] = number
+        for i in range(len(names_orig)):
+            suffix = f" ({str(suffixes[i])})" if suffixes[i] > 0 else ""
+            if max_length - len(suffix) < 0:
+                raise ValueError(f"Suffix of sheet name {suffix} is too long!")
+            if len(names_orig[i]) > max_length - len(suffix):
+                suffix = "..." + suffix
+            names_final[i] = f"{names_orig[i][:max_length - len(suffix)]}{suffix}"
+    if len(set(names_final)) < len(names_final):
+        collisions = set([name for name in names_final if names_final.count(name) > 1])
+        raise ValueError(f"The colliding sheet names could not be resolved. Collisions: {collisions}")
+    return names_final
+
+
 def write_sheet(df, writer, sheet_name='Sheet1', index=True, **kwargs):
     """
     Write df as an excel file to ExcelWriter, roughly similar to `df.to_excel` except that it handles
@@ -427,9 +452,10 @@ def write_sheet(df, writer, sheet_name='Sheet1', index=True, **kwargs):
 def write_sheets(df_dict: Dict[str, pd.DataFrame], fd_or_path):
     writer = pd.ExcelWriter(fd_or_path, engine='xlsxwriter')
 
-    for sheet_name, df in df_dict.items():
+    sheet_names = shorten_sheet_names([sanitize_excel_sheet_name(n) for n in df_dict.keys()])
+    for sheet_name, df in zip(sheet_names, df_dict.values()):
         has_index_name = any(df.index.names)
-        write_sheet(df, writer, sheet_name=sanitize_excel_sheet_name(sheet_name), index=has_index_name)
+        write_sheet(df, writer, sheet_name=sheet_name, index=has_index_name)
 
     writer.close()
 
