@@ -68,6 +68,7 @@ def log_access(exception=None):
 
 
 def log_data(data, table):
+    start_time = time.time()
     e = get_engine()
     try:
         ip = request.headers.get('X-Forwarded-For', request.remote_addr)
@@ -82,16 +83,33 @@ def log_data(data, table):
     except RuntimeError:
         request_data = {}
 
-    pd.DataFrame([dict(
+    df = pd.DataFrame([dict(
         timestamp=time.time(),
         **request_data,
         **data
-    )]).set_index('timestamp').to_sql(table, e, if_exists='append')
+    )]).set_index('timestamp')
+
+    try:
+        df.to_sql(table, e, if_exists='append')
+    except OperationalError as e:
+        print('Unable to log stats data:', e)
+
+    duration_seconds = time.time() - start_time
+    if duration_seconds > 0.5:
+        print(f'Logging stats took longer than expected ({duration_seconds:.1f}s)')
+
+
+_STATS_ENGINE = None
 
 
 def get_engine():
-    db_path = current_app.config['STATS_DB_PATH']
-    if db_path is None:
-        raise ValueError('Configure STATS_DB_PATH env var to use statistics')
-    return create_engine('sqlite:///' + os.path.abspath(db_path))
-
+    global _STATS_ENGINE
+    if _STATS_ENGINE is None:
+        db_path = current_app.config['STATS_DB_PATH']
+        if db_path is None:
+            raise ValueError('Configure STATS_DB_PATH env var to use statistics')
+        _STATS_ENGINE = create_engine(
+            'sqlite:///' + os.path.abspath(db_path),
+            connect_args={'timeout': 5}
+        )
+    return _STATS_ENGINE
