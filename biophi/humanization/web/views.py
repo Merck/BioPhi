@@ -246,6 +246,7 @@ def humanize_detail_export_oasis_table(task_id):
 @biophi_humanization.route('/humanize/report/batch/<task_id>/humanized.fa', methods=['GET'])
 def humanize_batch_export_humanized_fasta(task_id):
     results: List[HumanizeAntibodyTaskResult] = scheduler.get_results(task_id)
+    results = [r for r in results if not isinstance(r, Exception)]
     records = [record for result in results for record in result.get_humanized_records()]
     return send_fasta(records, name=results[0].get_export_name(num_seqs=len(results)))
 
@@ -253,6 +254,7 @@ def humanize_batch_export_humanized_fasta(task_id):
 @biophi_humanization.route('/humanize/report/batch/<task_id>/alignments.txt', methods=['GET'])
 def humanize_batch_export_alignments(task_id):
     results: List[HumanizeAntibodyTaskResult] = scheduler.get_results(task_id)
+    results = [r for r in results if not isinstance(r, Exception)]
     text = '\n\n'.join([result.humanization.get_alignment_string() for result in results])
     name = results[0].input.safe_name if len(results) == 1 else results[0].get_export_name(num_seqs=len(results))
     return send_text(text, name=name)
@@ -261,6 +263,7 @@ def humanize_batch_export_alignments(task_id):
 @biophi_humanization.route('/humanize/report/batch/<task_id>/sapiens.xlsx', methods=['GET'])
 def humanize_batch_export_table(task_id):
     results: List[HumanizeAntibodyTaskResult] = scheduler.get_results(task_id)
+    results = [r for r in results if not isinstance(r, Exception)]
     full = bool(request.args.get('full'))
     sheets = HumanizeAntibodyTaskResult.to_sheets(results, full=full)
     return send_excel(
@@ -392,6 +395,7 @@ def humanness_report_detail_get(task_id, result_index):
 @biophi_humanization.route('/humanness/report/<task_id>/oasis.xls', methods=['GET'])
 def humanness_export_oasis_table(task_id):
     results: List[HumannessTaskResult] = scheduler.get_results(task_id)
+    results = [r for r in results if not isinstance(r, Exception)]
     full = bool(request.args.get('full'))
     sheets = HumannessTaskResult.to_sheets(results, full=full)
     return send_excel(sheets, name='OASis_Results' if full else 'OASis_Summary')
