@@ -66,7 +66,7 @@
   </thead>
   <tbody>
     {% for result in results %}
-      <tr data-href="{{ url_for('biophi_humanization.humanness_report_detail_get', task_id=task_id, result_index=loop.index) }}">
+      <tr data-href="{{ url_for('biophi_humanization.humanness_report_detail_get', task_id=task_id, result_index=loop.index + offset) }}">
         <td class="border-end border-end">{{ result.input.name }}</td>
         {% if isinstance(result, Exception) %}
           <td class="border-end text-danger border-end" colspan="10">Failed: {{ result }}</td>
@@ -80,7 +80,7 @@
           {{ chain_row(result.humanness.vl, min_subj) }}
         {% endif %}
         <td>
-          <a class="btn btn-sm btn-light" href="{{ url_for('biophi_humanization.humanness_report_detail_get', task_id=task_id, result_index=loop.index) }}">
+          <a class="btn btn-sm btn-light" href="{{ url_for('biophi_humanization.humanness_report_detail_get', task_id=task_id, result_index=loop.index + offset) }}">
             Detail
           </a>
         </td>

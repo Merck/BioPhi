@@ -72,7 +72,7 @@
     {% if show == 'alignments' %}
       {% for result in results %}
         {% set min_subj = result.oasis_params.min_fraction_subjects if result.oasis_params else none %}
-        {% set detail_url = url_for('biophi_humanization.humanize_detail_get', task_id=task_id, index=loop.index) %}
+        {% set detail_url = url_for('biophi_humanization.humanize_detail_get', task_id=task_id, index=loop.index + offset) %}
         <h3>{{ result.input.name }} <a class="btn btn-light btn-sm" href="{{ detail_url }}">Show detail</a></h3>
         {% if result.humanized_humanness.vh %}
           <h5>Heavy chain</h5>
@@ -121,7 +121,7 @@
       <tbody>
         {% for result in results %}
           {% set min_subj = result.oasis_params.min_fraction_subjects if result.oasis_params else none %}
-          {% set detail_url = url_for('biophi_humanization.humanize_detail_get', task_id=task_id, index=loop.index) %}
+          {% set detail_url = url_for('biophi_humanization.humanize_detail_get', task_id=task_id, index=loop.index + offset) %}
           <tr data-href="{{ detail_url }}">
             <td class="border-end">{{ result.input.name }}</td>
             {% if isinstance(result, Exception) %}

@@ -44,6 +44,8 @@ def oasis(inputs, output, oasis_db, scheme, cdr_definition, min_percent_subjects
 
     click.echo(f'Settings:', err=True)
     click.echo(f'- OASis database: {oasis_db}', err=True)
+    click.echo(f'- Numbering scheme: {scheme}', err=True)
+    click.echo(f'- CDR definition: {cdr_definition}', err=True)
     click.echo('', err=True)
 
     click.echo(f'Loading chains: {" ".join(inputs)}', err=True)

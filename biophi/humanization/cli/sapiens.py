@@ -64,6 +64,10 @@ def sapiens(inputs, output, fasta_only, scores_only, mean_score_only, version, i
 
     click.echo(f'Settings:', err=True)
     click.echo(f'- Predicting using Sapiens model: {version}', err=True)
+    click.echo(f'- Numbering scheme: {scheme}', err=True)
+    click.echo(f'- CDR definition: {cdr_definition}', err=True)
+    click.echo(f'', err=True)
+
     if scores_only or mean_score_only:
         click.echo(f'- Producing Sapiens scores only', err=True)
         if fasta_only:

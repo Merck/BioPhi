@@ -185,7 +185,8 @@ def humanize_results_get(task_id):
     page = max(int(request.args.get('page', 1)), 1)
     has_prev_page = page > 1
     has_next_page = len(results) > page*limit
-    results = results[(page-1)*limit: page*limit]
+    offset = (page-1)*limit
+    results = results[offset: offset+limit]
 
     return render_template(
         'humanization/humanize_results.html',
@@ -196,7 +197,8 @@ def humanize_results_get(task_id):
         page=page,
         show=show,
         has_prev_page=has_prev_page,
-        has_next_page=has_next_page
+        has_next_page=has_next_page,
+        offset=offset
     )
 
 
@@ -366,7 +368,8 @@ def humanness_report_table_get(task_id):
     page = max(int(request.args.get('page', 1)), 1)
     has_prev_page = page > 1
     has_next_page = len(results) > page*limit
-    results = results[(page-1)*limit: page*limit]
+    offset = (page-1)*limit
+    results = results[offset: offset+limit]
 
     return render_template(
         'humanization/humanness_report_table.html',
@@ -374,7 +377,8 @@ def humanness_report_table_get(task_id):
         results=results,
         page=page,
         has_prev_page=has_prev_page,
-        has_next_page=has_next_page
+        has_next_page=has_next_page,
+        offset=offset
    )
 
 
