@@ -73,7 +73,7 @@ class RoBERTaSeq2Seq(RoBERTa):
         pred = pd.DataFrame(pred.numpy(), columns=self.interface.task.target_dictionary.symbols)
         if remove_special:
             pred.drop(['<s>', '<pad>', '</s>', '<unk>', '<mask>'], axis=1, inplace=True)
-        return pred
+        return pred, extra
 
     def _is_adding_bos(self):
         if isinstance(self.interface.task, SentencePredictionTask):
