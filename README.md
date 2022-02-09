@@ -22,10 +22,12 @@ It features methods for automated antibody humanization (Sapiens), humanness eva
 
 BioPhi is available at: [http://biophi.dichlab.org](http://biophi.dichlab.org)
 
-Learn more in the BioPhi, Sapiens and OASis in our pre-print:
+Learn more in the BioPhi, Sapiens and OASis in our publication:
 
-> Prihoda, D., Maamary, J., Waight, A., Juan, V., Fayadat-Dilman, L., Svozil, D., & Bitton, D. A. (2021). 
-> BioPhi: A platform for antibody design, humanization and humanness evaluation based on natural antibody repertoires and deep learning. BioRxiv, 2021.08.08.455394. https://doi.org/10.1101/2021.08.08.455394
+> David Prihoda, Jad Maamary, Andrew Waight, Veronica Juan, Laurence Fayadat-Dilman, Daniel Svozil & Danny A. Bitton (2022) 
+> BioPhi: A platform for antibody design, humanization, and humanness evaluation based on natural antibody repertoires and deep learning, mAbs, 14:1, DOI: https://doi.org/10.1080/19420862.2021.2020203
+
+For more information about the Sapiens antibody language model, see the [Sapiens repository](https://github.com/Merck/Sapiens)
 
 The data and notebooks supporting the analysis are found in: https://github.com/Merck/BioPhi-2021-publication
 
