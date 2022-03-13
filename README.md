@@ -85,7 +85,7 @@ conda activate biophi
 conda install biophi
 ```
 
-If conda installation fails, you can try running using Docker. See [Run BioPhi dev server through Docker Compose](https://github.com/Merck/BioPhi#run-biophi-dev-server-through-docker-compose).
+If conda installation fails, you can try running using Docker. See [Run BioPhi using provided Docker image](https://github.com/Merck/BioPhi#run-biophi-using-provided-docker-image).
 
 ### 3. Run simplified server
 
@@ -96,6 +96,25 @@ export OASIS_DB_PATH=/path/to/downloaded/OASis_9mers_v1.db
 # Run simplified BioPhi server (not for live deployment!)
 biophi web
 ```
+
+**Note:** This is simplified usage for local use only. 
+See [Deploying your own BioPhi server](#deploying-your-own-biophi-server) section below 
+to learn about deploying BioPhi properly on a server.
+
+## Run BioPhi using provided Docker image
+
+Run a simplified local server using a provided Docker image:
+
+```bash
+docker run \
+    -v /your/absolute/path/to/oasis/directory/:/data \
+    -e OASIS_DB_PATH=/data/OASis_9mers_v1.db \
+    -p 5000:5000 \
+    quay.io/biocontainers/biophi:1.0.3--pyhdfd78af_0 \
+    biophi web --host 0.0.0.0
+```
+
+The application will be accessible at [localhost:5000](http://localhost:5000).
 
 **Note:** This is simplified usage for local use only. 
 See [Deploying your own BioPhi server](#deploying-your-own-biophi-server) section below 
