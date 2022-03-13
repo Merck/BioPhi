@@ -85,6 +85,8 @@ conda activate biophi
 conda install biophi
 ```
 
+If conda installation fails, you can try running using Docker. See [Run BioPhi dev server through Docker Compose](https://github.com/Merck/BioPhi#run-biophi-dev-server-through-docker-compose).
+
 ### 3. Run simplified server
 
 ```bash
@@ -151,16 +153,26 @@ so you will have to restart the services after each code update.
 
 See https://docs.docker.com/get-docker/
 
-#### 2. Build all images using Docker Compose
-
+#### 2. Clone this repository
+    
+Download or clone this repository using:
+    
 ```bash
-# Run using Makefile
+git clone https://github.com/Merck/BioPhi.git
+```    
+    
+#### 3. Build all images using Docker Compose    
+    
+```bash
+# Open BioPhi directory
+cd BioPhi    
+# Build docker image using Makefile
 make docker-build
 # or directly using
 docker-compose build
 ```
 
-#### 3. Run all services using Docker Compose
+#### 4. Run all services using Docker Compose
 
 ```bash
 # Run using Makefile
@@ -177,7 +189,7 @@ make docker-build docker-run
 docker-compose up --build
 ```
 
-#### 4. Handle code updates
+#### 5. Handle code updates
 
 After your code is updated, you will need to stop the services, run build and start again. 
 See the next section for info on running locally with flask auto-reload.
@@ -204,9 +216,20 @@ or one of the alternatives ([Miniconda](https://docs.conda.io/en/latest/minicond
 Install and run [Redis server](https://redis.io/download). 
 On Mac, you can [install Redis using Brew](https://medium.com/@petehouston/install-and-config-redis-on-mac-os-x-via-homebrew-eb8df9a4f298).
 
-#### 3. Setup environment
+    
+#### 3. Clone this repository
+    
+Download or clone this repository using:
+    
+```bash
+git clone https://github.com/Merck/BioPhi.git
+```    
+    
+#### 4. Setup environment
 
 ```bash
+# Open BioPhi directory
+cd BioPhi    
 # Install dependencies using the provided Makefile
 make env
 # Or directly using
@@ -215,7 +238,7 @@ conda activate biophi
 pip install -e . --no-deps
 ```
 
-#### 4. Run all services
+#### 5. Run all services
 
 You will have to run each service in a separate terminal (Use Cmd+T to open a new tab):
 
@@ -232,7 +255,7 @@ make web
 
 See the provided 
 
-#### 5. Handle code updates
+#### 6. Handle code updates
 
 After your code is updated, the flask web service should refresh automatically. 
 However, the celery service needs to be stopped and started manually, 
