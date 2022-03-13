@@ -103,7 +103,9 @@ to learn about deploying BioPhi properly on a server.
 
 ## Run BioPhi using provided Docker image
 
-Run a simplified local server using a provided Docker image:
+First, download OASis DB as described above.
+
+Then, run a simplified BioPhi server using the provided Docker image:
 
 ```bash
 docker run \
@@ -178,9 +180,13 @@ Download or clone this repository using:
     
 ```bash
 git clone https://github.com/Merck/BioPhi.git
-```    
+```   
+
+#### 3. Download OASis DB
+
+Download OASis database as described above. Put it in local `data/` dir inside the project folder.
     
-#### 3. Build all images using Docker Compose    
+#### 4. Build all images using Docker Compose    
     
 ```bash
 # Open BioPhi directory
@@ -199,6 +205,8 @@ make docker-run
 # or directly using
 docker-compose up
 ```
+
+The application will be accessible at [localhost:5000](http://localhost:5000).
 
 To build and run, you can use:
 ```bash
@@ -234,7 +242,6 @@ or one of the alternatives ([Miniconda](https://docs.conda.io/en/latest/minicond
 
 Install and run [Redis server](https://redis.io/download). 
 On Mac, you can [install Redis using Brew](https://medium.com/@petehouston/install-and-config-redis-on-mac-os-x-via-homebrew-eb8df9a4f298).
-
     
 #### 3. Clone this repository
     
@@ -242,9 +249,13 @@ Download or clone this repository using:
     
 ```bash
 git clone https://github.com/Merck/BioPhi.git
-```    
-    
-#### 4. Setup environment
+```   
+
+#### 4. Download OASis DB
+
+Download OASis database as described above.
+ 
+#### 5. Setup environment
 
 ```bash
 # Open BioPhi directory
@@ -257,7 +268,7 @@ conda activate biophi
 pip install -e . --no-deps
 ```
 
-#### 5. Run all services
+#### 6. Run all services
 
 You will have to run each service in a separate terminal (Use Cmd+T to open a new tab):
 
@@ -266,15 +277,17 @@ You will have to run each service in a separate terminal (Use Cmd+T to open a ne
 redis-server
 
 # In a separate terminal, run celery worker queue
+export OASIS_DB_PATH=/path/to/OASis_9mers_v1.db
 make celery
 
 # In a separate terminal, run flask web server
+export OASIS_DB_PATH=/path/to/OASis_9mers_v1.db
 make web
 ```
 
 See the provided 
 
-#### 6. Handle code updates
+#### 7. Handle code updates
 
 After your code is updated, the flask web service should refresh automatically. 
 However, the celery service needs to be stopped and started manually, 

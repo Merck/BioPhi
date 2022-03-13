@@ -18,6 +18,9 @@ services:
       - CELERY_RESULT_BACKEND=redis://redis:6379/0
       - HTTP_PROXY
       - HTTPS_PROXY
+      - OASIS_DB_PATH=/data/OASis_9mers_v1.db
+    volumes:
+      - ./data/:/data
   # Redis provides the Redis in-memory database that serves as queue for Celery tasks
   redis:
     image: redis
@@ -34,6 +37,14 @@ services:
       - CELERY_RESULT_BACKEND=redis://redis:6379/0
       - HTTP_PROXY
       - HTTPS_PROXY
+      - OASIS_DB_PATH=/data/OASis_9mers_v1.db
+    volumes:
+      - ./data/:/data
     command: celery -A biophi.common.web.tasks.celery worker --loglevel=INFO
     depends_on:
       - redis
+
+
+
+
+

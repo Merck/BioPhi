@@ -6,3 +6,5 @@ work
 .DS_Store
 .kube-tmp-token
 tests/robot/results
+data
+
