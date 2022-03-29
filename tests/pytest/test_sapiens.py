@@ -1,10 +1,10 @@
 import numpy as np
-from biophi.humanization.methods.sapiens.predict import sapiens_predict_seq
+import sapiens
 
 
 def test_sapiens_predict():
     seq = 'QVQLVQSGVEVKKPGASVKVSCKASGYTFTNYYMYWVRQAPGQGLEWMGGINPSNGGTNFNEKFKNRVTLTTDSSTTTAYMELKSLQFDDTAVYYCARRDYRFDMGFDYWGQGTTVTVSS'
-    pred = sapiens_predict_seq(
+    pred = sapiens.predict_scores(
         seq=seq,
         chain_type='H',
         model_version='latest'

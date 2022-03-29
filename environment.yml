@@ -6,6 +6,8 @@ dependencies:
   - python = 3.8
   - pip
   - abnumber == 0.2.7
+  - anarci == 2020.04.23
+  - hmmer >= 3.1
   - pip:
     - click >= 7
     - pandas
@@ -19,4 +21,4 @@ dependencies:
     - tqdm
     - xlsxwriter
     - humanize
-    - fairseq == 0.10.2
+    - sapiens

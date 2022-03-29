@@ -7,7 +7,7 @@ from abnumber.chain import Chain, Alignment, Position
 from flask import current_app
 
 from biophi.common.utils.formatting import get_valid_filename
-from biophi.humanization.methods.sapiens.predict import sapiens_predict_chain
+import sapiens
 
 
 @dataclass
@@ -243,4 +243,13 @@ def sapiens_humanize_chain(parental_chain: Chain, params: SapiensHumanizationPar
         humanized_chain=humanized_chain,
         scores={pos: row.to_dict() for pos, (i, row) in zip(humanized_chain.positions, pred.iterrows())},
         next_scores={pos: row.to_dict() for pos, (i, row) in zip(humanized_chain.positions, pred_next.iterrows())},
+    )
+
+
+def sapiens_predict_chain(chain, model_version='latest', return_all_hiddens=False):
+    return sapiens_predict_seq(
+        seq=chain.seq,
+        chain_type=chain.chain_type,
+        model_version=model_version,
+        return_all_hiddens=return_all_hiddens
     )
