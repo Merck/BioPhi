@@ -247,7 +247,7 @@ def sapiens_humanize_chain(parental_chain: Chain, params: SapiensHumanizationPar
 
 
 def sapiens_predict_chain(chain, model_version='latest', return_all_hiddens=False):
-    return sapiens_predict_seq(
+    return sapiens.predict_scores(
         seq=chain.seq,
         chain_type=chain.chain_type,
         model_version=model_version,
