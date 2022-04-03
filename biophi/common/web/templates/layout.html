@@ -41,6 +41,9 @@
           </div>
         </div>
         <div class="d-flex navbar-nav">
+          {% if BANNER_HTML %}
+            <span class="nav-custom-banner">{{ BANNER_HTML | safe }}</span>
+          {% endif %}
           <a href="#" class="nav-link" data-bs-toggle="modal" data-bs-target="#helpModal">Help</a>
         </div>
       </div>

@@ -15,6 +15,19 @@
     color: rgba(255,255,255,.90);
 }
 
+.nav-custom-banner {
+    padding: 0.5rem 1rem;
+    color: white;
+}
+
+.nav-custom-banner a{
+    color: #a194f1;
+    text-decoration: underline;
+}
+.nav-custom-banner a:hover{
+    color: #c5bcff;
+}
+
 #header {
     background-position: center 80%;
     background-size: cover;

@@ -33,6 +33,7 @@ app.jinja_env.globals.update(int=int)
 app.jinja_env.globals.update(sorted=sorted)
 app.jinja_env.globals.update(min=min)
 app.jinja_env.globals.update(max=max)
+app.jinja_env.globals.update(BANNER_HTML=app.config['BANNER_HTML'])
 
 app.register_blueprint(biophi_humanization, url_prefix='/humanization')
 
