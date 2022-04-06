@@ -61,18 +61,11 @@ wget https://zenodo.org/record/5164685/files/OASis_9mers_v1.db.gz
 gunzip OASis_9mers_v1.db.gz
 ```
 
-### 2. Install BioPhi from Bioconda
+### 2. Install BioPhi using Conda
 
 You can install BioPhi using [Conda](https://docs.conda.io/projects/conda/en/latest/user-guide/install/download.html) 
 or one of the alternatives ([Miniconda](https://docs.conda.io/en/latest/miniconda.html), 
 [Miniforge](https://github.com/conda-forge/miniforge)).
-
-Set up Bioconda and Conda-Forge channels:
-
-```bash
-conda config --add channels bioconda
-conda config --add channels conda-forge
-```
 
 Install BioPhi using:
 
@@ -81,8 +74,9 @@ Install BioPhi using:
 conda create -n biophi python=3.8
 conda activate biophi
 
-# Install BioPhi
-conda install biophi
+# Install BioPhi 
+# Using Bioconda and Conda-Forge channels
+conda install biophi -c bioconda -c conda-forge --override-channels
 ```
 
 If conda installation fails, you can try running using Docker. See [Run BioPhi using provided Docker image](https://github.com/Merck/BioPhi#run-biophi-using-provided-docker-image).
