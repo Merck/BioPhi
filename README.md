@@ -106,7 +106,7 @@ docker run \
     -v /your/absolute/path/to/oasis/directory/:/data \
     -e OASIS_DB_PATH=/data/OASis_9mers_v1.db \
     -p 5000:5000 \
-    quay.io/biocontainers/biophi:1.0.3--pyhdfd78af_0 \
+    quay.io/biocontainers/biophi:1.0.5--pyhdfd78af_0 \
     biophi web --host 0.0.0.0
 ```
 
