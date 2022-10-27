@@ -143,7 +143,7 @@ def sapiens_scores_only(inputs, output_csv, humanization_params, limit=None, mea
                 name=record.id,
                 scheme=humanization_params.scheme,
                 cdr_definition=humanization_params.cdr_definition
-              ) for record in iterate_fasta(inputs, limit=limit)]
+              ) for record in tqdm(iterate_fasta(inputs, limit=limit))]
 
     if output_csv:
         click.echo(f'Writing scores CSV to file: {output_csv}', err=True)
@@ -189,7 +189,7 @@ def sapiens_fasta_only(inputs, output_fasta, humanization_params, limit=None):
                 name=record.id,
                 scheme=humanization_params.scheme,
                 cdr_definition=humanization_params.cdr_definition
-              ) for record in iterate_fasta(inputs, limit=limit)]
+              ) for record in tqdm(iterate_fasta(inputs, limit=limit))]
 
     if output_fasta:
         click.echo(f'Writing FASTA to file: {output_fasta}', err=True)
