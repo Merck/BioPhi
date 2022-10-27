@@ -5,7 +5,7 @@ channels:
 dependencies:
   - python = 3.8
   - pip
-  - abnumber == 0.2.7
+  - abnumber == 0.3.0
   - anarci == 2020.04.23
   - hmmer >= 3.1
   - pip:

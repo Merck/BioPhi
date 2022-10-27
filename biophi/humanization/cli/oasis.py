@@ -15,7 +15,8 @@ from functools import partial
 @click.option('--scheme', default='kabat', help='Numbering scheme (kabat, chothia, imgt, aho)')
 @click.option('--cdr-definition', default='kabat', help='Numbering scheme (kabat, chothia, imgt, north)')
 @click.option('--min-percent-subjects', default=10, type=float, help='Minimum percent of OAS subjects to consider peptide human')
-def oasis(inputs, output, oasis_db, scheme, cdr_definition, min_percent_subjects):
+@click.option('--summary', is_flag=True, default=False, type=bool, help='Only export a single summary sheet')
+def oasis(inputs, output, oasis_db, scheme, cdr_definition, min_percent_subjects, summary):
     """OASis: Antibody humanness evaluation using 9-mer peptide search.
 
     OASis evaluates antibody humanness by searching all overlapping 9-mers
@@ -48,10 +49,10 @@ def oasis(inputs, output, oasis_db, scheme, cdr_definition, min_percent_subjects
     click.echo(f'- CDR definition: {cdr_definition}', err=True)
     click.echo('', err=True)
 
-    click.echo(f'Loading chains: {" ".join(inputs)}', err=True)
+    click.echo(f'Loading and numbering chains: {" ".join(inputs)}', err=True)
 
     antibody_inputs, invalid_names, duplicate_names, unrecognized_files = parse_antibody_files(
-        files=inputs
+        files=inputs, verbose=True
     )
 
     if invalid_names:
@@ -70,23 +71,37 @@ def oasis(inputs, output, oasis_db, scheme, cdr_definition, min_percent_subjects
 
     show_unpaired_warning(antibody_inputs)
 
+    if len(antibody_inputs) > 1 and not summary:
+        click.echo('Use --summary to export only the summary sheet', err=True)
+
     oasis_params = OASisParams(
         oasis_db_path=oasis_db,
         min_fraction_subjects=min_percent_subjects/100
     )
     pool = Pool()
     iterator = pool.imap(partial(
-        humanness_task,
+        humanness_task_wrapper,
         oasis_params=oasis_params,
         scheme=scheme,
         cdr_definition=cdr_definition
     ), antibody_inputs)
-    results = list(tqdm(iterator, total=len(antibody_inputs)))
+    results = list(tqdm(iterator, desc='Generating results', total=len(antibody_inputs)))
+
+    # Remove failed results
+    results = [r for r in results if r is not None]
 
     click.echo('Saving report...', err=True)
-    sheets = HumannessTaskResult.to_sheets(results, full=True)
+    sheets = HumannessTaskResult.to_sheets(results, full=not summary)
     write_sheets(sheets, output)
     click.echo(f'Saved XLSX report to: {output}', err=True)
+
+
+def humanness_task_wrapper(antibody_input, **kwargs):
+    try:
+        return humanness_task(antibody_input, **kwargs)
+    except Exception as e:
+        print('Error:', antibody_input.name, e, antibody_input.heavy_protein_seq, antibody_input.light_protein_seq)
+        return None
 
 
 def show_unpaired_warning(antibody_inputs):

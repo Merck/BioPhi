@@ -223,20 +223,23 @@ class HumannessTaskResult:
             'Antibody': self.input.name,
             'Threshold': threshold,
             'OASis Percentile': self.humanness.get_oasis_percentile(self.oasis_params.min_fraction_subjects),
-            'OASis Identity': self.humanness.get_oasis_identity(self.oasis_params.min_fraction_subjects)
+            'OASis Identity': self.humanness.get_oasis_identity(self.oasis_params.min_fraction_subjects),
+            'Germline Content': self.humanness.get_germline_content()
         }
         if self.humanness.vh:
             series['Heavy V Germline'] = self.humanness.vh.v_germline_names[0]
             series['Heavy J Germline'] = self.humanness.vh.j_germline_names[0]
             series['Heavy OASis Percentile'] = self.humanness.vh.get_oasis_percentile(self.oasis_params.min_fraction_subjects)
             series['Heavy OASis Identity'] = self.humanness.vh.get_oasis_identity(self.oasis_params.min_fraction_subjects)
-            series['Heavy Non-human peptides'] = self.humanness.vh.get_num_nonhuman_peptides(self.oasis_params.min_fraction_subjects)
+            series['Heavy Non-human peptides'] = self.humanness.vh.get_num_nonhuman_peptides(self.oasis_params.min_fraction_subjects),
+            series['Heavy Germline Content'] = self.humanness.vh.get_germline_content()
         if self.humanness.vl:
             series['Light V Germline'] = self.humanness.vl.v_germline_names[0]
             series['Light J Germline'] = self.humanness.vl.j_germline_names[0]
             series['Light OASis Percentile'] = self.humanness.vl.get_oasis_percentile(self.oasis_params.min_fraction_subjects)
             series['Light OASis Identity'] = self.humanness.vl.get_oasis_identity(self.oasis_params.min_fraction_subjects)
             series['Light Non-human peptides'] = self.humanness.vl.get_num_nonhuman_peptides(self.oasis_params.min_fraction_subjects)
+            series['Light Germline Content'] = self.humanness.vl.get_germline_content()
 
         return pd.Series(series)
 

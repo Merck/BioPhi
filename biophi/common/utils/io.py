@@ -20,6 +20,7 @@ from biophi.common.utils.seq import looks_like_antibody_heavy_chain, download_pd
 import os
 from biophi.common.utils.seq import sanitize_sequence
 from biophi.common.utils.stats import log_submission
+from tqdm import tqdm
 
 
 @dataclass
@@ -208,25 +209,28 @@ def clean_antibody_name(name):
     return name
 
 
-def pair_antibody_records(records) -> (List[AntibodyInput], List[str], List[str]):
+def pair_antibody_records(records, verbose=False) -> (List[AntibodyInput], List[str], List[str]):
     invalid_names = []
     duplicate_names = []
 
     heavy_protein_seqs = {}
     light_protein_seqs = {}
-    for protein_record in records:
+    for protein_record in tqdm(records, disable=not verbose, desc='Numbering chains'):
         name = clean_antibody_name(protein_record.id)
         if looks_like_dna(protein_record.seq):
             protein_record = protein_record.translate()
+        if protein_record.seq.endswith('*'):
+            protein_record = protein_record[:-1]
 
         try:
             if looks_like_antibody_heavy_chain(protein_record.seq):
                 protein_seqs = heavy_protein_seqs
             else:
                 protein_seqs = light_protein_seqs
-        except ChainParseError:
+        except Exception as e:
+            if verbose:
+                print('Error:', e, str(protein_record.seq), file=sys.stderr)
             invalid_names.append(name)
-            # TODO log record
             continue
         if name in protein_seqs:
             duplicate_names.append(name)
@@ -235,11 +239,18 @@ def pair_antibody_records(records) -> (List[AntibodyInput], List[str], List[str]
 
     antibody_inputs = []
     for name in sorted(set(heavy_protein_seqs) | set(light_protein_seqs)):
-        antibody_inputs.append(AntibodyInput(
-            name=name,
-            heavy_protein_seq=heavy_protein_seqs.get(name),
-            light_protein_seq=light_protein_seqs.get(name),
-        ))
+        try:
+            antibody_inputs.append(AntibodyInput(
+                name=name,
+                heavy_protein_seq=heavy_protein_seqs.get(name),
+                light_protein_seq=light_protein_seqs.get(name),
+            ))
+        except Exception as e:
+            if verbose:
+                print('Error:', e, name, file=sys.stderr)
+            invalid_names.append(name)
+            continue
+
     return antibody_inputs, invalid_names, duplicate_names
 
 
@@ -293,7 +304,7 @@ def read_file_contents(file: Union[str, FileStorage]):
     return contents, filename
 
 
-def parse_antibody_files(files: List[Union[str, FileStorage]]) -> (List[AntibodyInput], List[str], List[str], List[str]):
+def parse_antibody_files(files: List[Union[str, FileStorage]], verbose=False) -> (List[AntibodyInput], List[str], List[str], List[str]):
     names = set()
     pdb_antibody_inputs = []
     pdb_invalid_names = []
@@ -324,7 +335,7 @@ def parse_antibody_files(files: List[Union[str, FileStorage]]) -> (List[Antibody
         else:
             unrecognized_files.append(filename)
 
-    seq_antibody_inputs, seq_invalid_names, seq_duplicate_names = pair_antibody_records(unpaired_records)
+    seq_antibody_inputs, seq_invalid_names, seq_duplicate_names = pair_antibody_records(unpaired_records, verbose=verbose)
 
     return (
         pdb_antibody_inputs + seq_antibody_inputs,
