@@ -12,12 +12,27 @@
 {% block main %}
 
 <div class="row mt-3">
-  <div class="col-sm-3">
+  <div class="col-sm-5">
     <a class="btn btn-light" href="{{ url_for('biophi_humanization.humanness_report_table_get', task_id=task_id) }}">
       {{ icon('chevron-left') }} Results
     </a>
   </div>
-  <div class="col-sm-9 d-print-none">
+  {% if has_next_page or has_prev_page %}
+    <div class="col-sm-2">
+      {% if has_prev_page %}
+        <a class="btn btn-light" href="{{ url_for('biophi_humanization.humanness_report_detail_get', task_id=task_id,  result_index=result_index-1) }}"> {{ icon('caret-left-fill') }}  </a>
+      {% else %}
+        <a class="btn btn-light" style="visibility:hidden"> {{ icon('caret-left-fill') }} </a>
+      {% endif %}
+      {{result_index}}/{{len_results}}
+      {% if has_next_page %}
+        <a class="btn btn-light" href="{{ url_for('biophi_humanization.humanness_report_detail_get', task_id=task_id,  result_index=result_index+1) }}"> {{ icon('caret-right-fill') }} </a>
+      {% else %}
+        <a class="btn btn-light" style="visibility:hidden"> {{ icon('caret-right-fill') }} </a>
+      {% endif %}
+    </div>
+  {% endif %}
+  <div class="col-sm-5 d-print-none">
     <div class="mb-3 text-end">
       <div class="d-inline-block">
         <a class="btn btn-light" href="{{ url_for('biophi_humanization.humanize_get', humanness_task_id=task_id, index=result_index) }}">

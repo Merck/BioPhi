@@ -24,6 +24,10 @@ class Scheduler(ABC):
         pass
 
     @abstractmethod
+    def get_results_len(self, task_id):
+        pass
+
+    @abstractmethod
     def are_results_ready(self, task_id):
         pass
 
@@ -64,6 +68,9 @@ class CeleryScheduler(Scheduler):
 
     def get_results(self, task_id, timeout=15):
         return self.get_celery_group_result(task_id).join(timeout=timeout, propagate=False)
+
+    def get_results_len(self, task_id):
+        return len(self.get_celery_group_result(task_id))
 
     def are_results_ready(self, task_id):
         return self.get_celery_group_result(task_id).ready()
@@ -109,6 +116,9 @@ class SimpleInMemoryScheduler(Scheduler):
         task_ids = self.get_result(task_id)
         return [self.get_result(i) for i in task_ids]
 
+    def get_results_len(self, task_id):
+        return len(self.get_result(task_id))
+
     def are_results_ready(self, task_id):
         return task_id in self.results
 
@@ -150,6 +160,10 @@ class NotInitializedScheduler(Scheduler):
 
     def get_result(self, task_id, index=None, timeout=15):
         self.throw()
+    
+    def get_results_len(self, task_id):
+        self.throw()
+
 
 
 class SchedulerProxy:

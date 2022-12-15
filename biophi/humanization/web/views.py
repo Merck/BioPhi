@@ -206,14 +206,21 @@ def humanize_results_get(task_id):
 def humanize_detail_get(task_id, index):
     result_task_id = scheduler.get_result_task_id(task_id, index)
     result: HumanizeAntibodyTaskResult = scheduler.get_result(task_id, index)
+
+    len_results = scheduler.get_results_len(task_id)
+    
+    has_prev_page = int(index) > 1
+    has_next_page = int(index) < len_results
+
     return render_template('humanization/humanize_detail.html',
-                           task_id=task_id, result_task_id=result_task_id, result=result, result_index=index)
+                           task_id=task_id, result_task_id=result_task_id, result=result, result_index=int(index), len_results=len_results, has_prev_page=has_prev_page, has_next_page=has_next_page)
 
 
 @biophi_humanization.route('/humanize/report/<task_id>/humanized.fa', methods=['GET'])
 def humanize_detail_export_humanized_fasta(task_id):
     index = request.args.get('index')
     result: HumanizeAntibodyTaskResult = scheduler.get_result(task_id, index)
+
     return send_fasta(
         result.get_humanized_records(),
         name=result.get_export_name(),
@@ -388,8 +395,20 @@ def humanness_report_table_get(task_id):
 @biophi_humanization.route('/humanness/report/<task_id>/detail/<int:result_index>/', methods=['GET'])
 def humanness_report_detail_get(task_id, result_index):
     result: HumannessTaskResult = scheduler.get_result(task_id, result_index)
+    len_results = scheduler.get_results_len(task_id)
+
+    has_prev_page = int(result_index) > 1
+    has_next_page = int(result_index) < len_results
+
+
     return render_template('humanization/humanness_report_detail.html',
-                           task_id=task_id, result_index=result_index, result=result)
+                           task_id=task_id, 
+                           result_index=result_index, 
+                           result=result, 
+                           len_results=len_results,
+                           has_prev_page=has_prev_page,
+                           has_next_page=has_next_page,
+    )
 
 
 @biophi_humanization.route('/humanness/report/<task_id>/oasis.xls', methods=['GET'])
