@@ -373,9 +373,9 @@ def send_text(text, name, extension='txt', timestamp=True):
 
     return send_file(
         bytesio,
-        attachment_filename=f'{name}.{extension}',
+        download_name=f'{name}.{extension}',
         as_attachment=True,
-        cache_timeout=0
+        max_age=0
     )
 
 
@@ -480,9 +480,9 @@ def send_excel(df_dict: Dict[str, pd.DataFrame], name, timestamp=True):
         name += time.strftime("_%Y-%m-%d_%H-%M-%S")
     return send_file(
         output,
-        attachment_filename=f'{name}.xlsx',
+        download_name=f'{name}.xlsx',
         as_attachment=True,
-        cache_timeout=0
+        max_age=0
     )
 
 
