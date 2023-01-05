@@ -208,12 +208,14 @@ def humanize_detail_get(task_id, index):
     result: HumanizeAntibodyTaskResult = scheduler.get_result(task_id, index)
 
     len_results = scheduler.get_results_len(task_id)
-    
-    has_prev_page = int(index) > 1
-    has_next_page = int(index) < len_results
 
     return render_template('humanization/humanize_detail.html',
-                           task_id=task_id, result_task_id=result_task_id, result=result, result_index=int(index), len_results=len_results, has_prev_page=has_prev_page, has_next_page=has_next_page)
+                           task_id=task_id, 
+                           result_task_id=result_task_id, 
+                           result=result, 
+                           result_index=int(index), 
+                           len_results=len_results
+                           )
 
 
 @biophi_humanization.route('/humanize/report/<task_id>/humanized.fa', methods=['GET'])
@@ -397,17 +399,11 @@ def humanness_report_detail_get(task_id, result_index):
     result: HumannessTaskResult = scheduler.get_result(task_id, result_index)
     len_results = scheduler.get_results_len(task_id)
 
-    has_prev_page = int(result_index) > 1
-    has_next_page = int(result_index) < len_results
-
-
     return render_template('humanization/humanness_report_detail.html',
                            task_id=task_id, 
-                           result_index=result_index, 
+                           result_index=int(result_index), 
                            result=result, 
                            len_results=len_results,
-                           has_prev_page=has_prev_page,
-                           has_next_page=has_next_page,
     )
 
 

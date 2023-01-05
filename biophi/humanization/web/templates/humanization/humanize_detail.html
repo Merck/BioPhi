@@ -19,15 +19,15 @@
       {{ icon('chevron-left') }} Results
     </a>
   </div>
-  {% if has_next_page or has_prev_page %}
+  {% if result_index > 1 or result_index < len_results %}
     <div class="col-sm-2">
-      {% if has_prev_page %}
+      {% if result_index > 1 %}
         <a class="btn btn-light" href="{{ url_for('biophi_humanization.humanize_detail_get', task_id=task_id,  index=result_index-1) }}"> {{ icon('caret-left-fill') }}  </a>
       {% else %}
         <a class="btn btn-light" style="visibility:hidden"> {{ icon('caret-left-fill') }} </a>
       {% endif %}
       {{result_index}}/{{len_results}}
-      {% if has_next_page %}
+      {% if result_index < len_results %}
         <a class="btn btn-light" href="{{ url_for('biophi_humanization.humanize_detail_get', task_id=task_id,  index=result_index+1) }}"> {{ icon('caret-right-fill') }} </a>
       {% else %}
         <a class="btn btn-light" style="visibility:hidden"> {{ icon('caret-right-fill') }} </a>
