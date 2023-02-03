@@ -11,7 +11,7 @@ dependencies:
   - pip:
     - click >= 7
     - pandas
-    - sqlalchemy
+    - sqlalchemy < 2
     - flask
     - redis
     - celery
