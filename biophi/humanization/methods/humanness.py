@@ -353,8 +353,8 @@ def parse_peptide_humanness(peptide: str, oas_hits: pd.DataFrame, num_total_oas_
 
 
 def get_oas_hits(peptides: Union[str, List[str]], engine: Engine, filter_chain=None):
-    if not isinstance(peptides, list):
-        peptides = list(peptides)
+    if not isinstance(peptides, tuple):
+        peptides = tuple(peptides)
     filter_chain_statement = ""
     if filter_chain:
         assert filter_chain in ['Heavy', 'Light']
