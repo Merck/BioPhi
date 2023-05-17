@@ -71,7 +71,7 @@ Install BioPhi using:
 
 ```bash
 # Recommended: Create a separate BioPhi environment
-conda create -n biophi python=3.8
+conda create -n biophi python=3.9
 conda activate biophi
 
 # Install BioPhi 
