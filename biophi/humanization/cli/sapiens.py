@@ -38,7 +38,8 @@ from tqdm import tqdm
 @click.option('--cdr-definition', default=HumanizationParams.cdr_definition, help=f'CDR definition: one of {", ".join(SUPPORTED_CDR_DEFINITIONS)}')
 @click.option('--humanize-cdrs', is_flag=True, default=False, type=bool, help='Allow humanizing mutations in CDRs')
 @click.option('--limit', required=False, metavar='N', type=int, help='Process only first N records')
-def sapiens(inputs, output, fasta_only, scores_only, mean_score_only, generate_only, version, iterations, scheme, cdr_definition, humanize_cdrs, limit, oasis_db):
+@click.option('--n_generated_sequences', required=False, type=int, default=1000, help='Number of sequences to output when using --generate-only')
+def sapiens(inputs, output, fasta_only, scores_only, mean_score_only, generate_only, version, iterations, scheme, cdr_definition, humanize_cdrs, limit, oasis_db, n_generated_sequences):
     """Sapiens: Antibody humanization using deep learning.
 
      Sapiens is trained on 20 million natural antibody sequences
@@ -128,7 +129,7 @@ def sapiens(inputs, output, fasta_only, scores_only, mean_score_only, generate_o
                 output,
                 limit=limit,
                 humanization_params=humanization_params,
-
+                initial_n_samples=n_generated_sequences,
             )
         else:
             from biophi.common.web.views import app
