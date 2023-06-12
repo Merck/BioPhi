@@ -1,13 +1,17 @@
 from functools import cached_property
 from typing import Dict, List, Optional
-import pandas as pd
-import requests
-from dataclasses import dataclass
+
 from abnumber.chain import Chain, Alignment, Position
+from Bio.SeqRecord import SeqRecord
+from Bio.Seq import Seq
+from dataclasses import dataclass
 from flask import current_app
+import numpy as np
+from numpy.random import default_rng
+import pandas as pd
+import sapiens
 
 from biophi.common.utils.formatting import get_valid_filename
-import sapiens
 
 
 @dataclass
@@ -253,3 +257,51 @@ def sapiens_predict_chain(chain, model_version='latest', return_all_hiddens=Fals
         model_version=model_version,
         return_all_hiddens=return_all_hiddens
     )
+
+
+def generate_samples(input_df: pd.DataFrame, initial_n_samples: int) -> List[str]:
+    input_ndarray = input_df.to_numpy(dtype="float32")
+    n_rows = input_ndarray.shape[0]
+    n_possible_aa_residues = input_ndarray.shape[1]
+    aa_array=input_df.columns.values
+    rng = default_rng(seed=42)
+    
+    # Ensure that we the probabilities for each residue sum to 1
+    fixed_probabilities = input_ndarray / input_ndarray.sum(axis=1,keepdims=1)
+    # make an ndarray of shape (n_samples, n_rows), where each row corresponds to a possible sequence,
+    # and each value in the row corresponds to the aa to be chosen from the aa_array
+    # If sampled[0] = [1,4,5], then that sequence would correspond to CFG
+    # this could be simplified with something like
+    # https://stackoverflow.com/questions/34187130/fast-random-weighted-selection-across-all-rows-of-a-stochastic-matrix?noredirect=1&lq=1
+    # https://stackoverflow.com/questions/47722005/vectorizing-numpy-random-choice-for-given-2d-array-of-probabilities-along-an-a
+    # https://stackoverflow.com/questions/40474436/how-to-apply-numpy-random-choice-to-a-matrix-of-probability-values-vectorized-s
+    list_of_random_samples = [
+        rng.choice(
+            n_possible_aa_residues,
+            initial_n_samples,
+            p=fixed_probabilities[i]
+        ) for i in range(n_rows)
+    ]
+    sampled = np.stack(list_of_random_samples, axis=1)
+    # Get unique_sequences, many of the sequences will be duplicates given that each
+    # residue normally has one aa with a very high probability
+    unique_rows = np.unique(sampled, axis=0)
+    # Convert indices of aa_array to strings
+    sequences = ["".join(np.take(aa_array, unique_rows[i])) for i in range(unique_rows.shape[0])]
+    return sequences
+
+def generate_seq_records_from_sequence_strings(
+    sequences: List[str],
+    id_prefix: str,
+    description: str,
+) -> List[SeqRecord]:
+        return [
+            SeqRecord(
+                Seq(seq),
+                id=id_prefix,
+                description=(
+                    f'{description} {i}'
+                )
+            )
+            for i, seq in enumerate(sequences)
+        ]

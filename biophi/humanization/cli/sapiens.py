@@ -1,21 +1,28 @@
 from functools import partial
 from multiprocessing import Pool
+import os
+from pathlib import Path
+import sys
 
-import click
+from abnumber import Chain, ChainParseError, SUPPORTED_CDR_DEFINITIONS, SUPPORTED_SCHEMES
 from Bio import SeqIO
+import click
 import pandas as pd
+
 from biophi.common.utils.formatting import logo
 from biophi.common.utils.io import parse_antibody_files, write_sheets
 from biophi.common.utils.seq import iterate_fasta
 from biophi.humanization.cli.oasis import show_unpaired_warning
+from biophi.humanization.methods.humanization import (
+    generate_samples,
+    generate_seq_records_from_sequence_strings,
+    humanize_chain,
+    SapiensHumanizationParams,
+    HumanizationParams
+)
 from biophi.humanization.methods.humanness import OASisParams
-from biophi.humanization.methods.humanization import humanize_chain, SapiensHumanizationParams, HumanizationParams
-from abnumber import Chain, ChainParseError, SUPPORTED_CDR_DEFINITIONS, SUPPORTED_SCHEMES
-import os
-import sys
-from tqdm import tqdm
 from biophi.humanization.web.tasks import humanize_antibody_task, HumanizeAntibodyTaskResult
-
+from tqdm import tqdm
 
 @click.command()
 @click.argument('inputs', required=False, nargs=-1)
@@ -23,6 +30,7 @@ from biophi.humanization.web.tasks import humanize_antibody_task, HumanizeAntibo
 @click.option('--fasta-only', is_flag=True, default=False, type=bool, help='Output only a FASTA file with humanized sequences (speeds up processing)')
 @click.option('--scores-only', is_flag=True, default=False, type=bool, help='Output only a CSV file with Sapiens position*residue scores')
 @click.option('--mean-score-only', is_flag=True, default=False, type=bool, help='Output only a CSV file with one Sapiens score per sequence')
+@click.option('--generate-only', is_flag=True, default=False, type=bool, help='Generate humanized sequences based on the sapiens BERT model')
 @click.option('--oasis-db', required=False, help='OAS peptide database connection string (required to run OASis)')
 @click.option('--version', default='latest', help='Sapiens trained model name')
 @click.option('--iterations', type=int, default=1, help='Run Sapiens given number of times to discover more humanizing mutations')
@@ -30,7 +38,7 @@ from biophi.humanization.web.tasks import humanize_antibody_task, HumanizeAntibo
 @click.option('--cdr-definition', default=HumanizationParams.cdr_definition, help=f'CDR definition: one of {", ".join(SUPPORTED_CDR_DEFINITIONS)}')
 @click.option('--humanize-cdrs', is_flag=True, default=False, type=bool, help='Allow humanizing mutations in CDRs')
 @click.option('--limit', required=False, metavar='N', type=int, help='Process only first N records')
-def sapiens(inputs, output, fasta_only, scores_only, mean_score_only, version, iterations, scheme, cdr_definition, humanize_cdrs, limit, oasis_db):
+def sapiens(inputs, output, fasta_only, scores_only, mean_score_only, generate_only, version, iterations, scheme, cdr_definition, humanize_cdrs, limit, oasis_db):
     """Sapiens: Antibody humanization using deep learning.
 
      Sapiens is trained on 20 million natural antibody sequences
@@ -51,6 +59,10 @@ def sapiens(inputs, output, fasta_only, scores_only, mean_score_only, version, i
         # Humanize FASTA file(s), save to directory along with OASis humanness report
         biophi sapiens input.fa --output ./report/ \\
           --oasis-db sqlite:////Absolute/path/to/oas_human_subject_9mers_2019_11.db
+        
+        \b
+        # Generate humanized sequences FASTA file
+        biophi sapiens input.fa --generate-only --output humanized_sequences
 
     INPUTS: Input FASTA file path(s). If not provided, creates an interactive session.
     """
@@ -72,6 +84,8 @@ def sapiens(inputs, output, fasta_only, scores_only, mean_score_only, version, i
         click.echo(f'- Producing Sapiens scores only', err=True)
         if fasta_only:
             raise ValueError('Cannot use --fasta-only together with --scores-only')
+        if generate_only:
+            raise ValueError('Cannot use --generate-only together with --scores-only')        
         if iterations != 1:
             raise ValueError('Iterations cannot be used with --scores-only')
         iterations = 0
@@ -107,6 +121,14 @@ def sapiens(inputs, output, fasta_only, scores_only, mean_score_only, version, i
                 output,
                 limit=limit,
                 humanization_params=humanization_params
+            )
+        elif generate_only:
+            return sapiens_generate_only(
+                inputs,
+                output,
+                limit=limit,
+                humanization_params=humanization_params,
+
             )
         else:
             from biophi.common.web.views import app
@@ -210,6 +232,39 @@ def sapiens_fasta_only(inputs, output_fasta, humanization_params, limit=None):
     if output_fasta:
         click.echo(f'Saved {len(chains):,} humanized chains to: {output_fasta}', err=True)
         click.echo('Done.', err=True)
+
+
+def sapiens_generate_only(inputs, output_fasta, humanization_params, limit=None, initial_n_samples=1000) -> None:
+    if output_fasta:
+        output_dir = Path(output_fasta)
+        output_dir.mkdir(parents=True, exist_ok=True)
+
+    chains = [Chain(
+                record.seq,
+                name=record.id,
+                scheme=humanization_params.scheme,
+                cdr_definition=humanization_params.cdr_definition
+              ) for record in tqdm(iterate_fasta(inputs, limit=limit))]
+
+    for chain in tqdm(chains, disable=(not output_fasta)):
+        humanization = humanize_chain(chain, params=humanization_params)
+        scores = humanization.to_score_dataframe()
+        generated_samples = generate_samples(input_df=scores, initial_n_samples=initial_n_samples)
+        chain_label = 'VH' if humanization.humanized_chain.is_heavy_chain() else 'VL'
+
+        records = generate_seq_records_from_sequence_strings(
+            sequences = generated_samples,
+            id_prefix = f'{chain.name}{humanization.humanized_chain.tail}',
+            description = f'{chain_label} {humanization_params.get_export_name().replace("_"," ")}'.strip()
+        )
+
+        if output_fasta:
+            f = open(output_dir / f"{chain.name}_generated.fasta", 'wt')
+        SeqIO.write(records, f if output_fasta else sys.stdout, 'fasta-2line')
+
+        if output_fasta:
+            click.echo(f'Saved {len(records):,} humanized chains to: {output_fasta}', err=True)
+            click.echo('Done.', err=True)
 
 
 def sapiens_full(inputs, output_dir, humanization_params, oasis_params, limit=None):
