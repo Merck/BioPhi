@@ -3,6 +3,7 @@ from multiprocessing import Pool
 import os
 from pathlib import Path
 import sys
+from typing import List, Optional
 
 from abnumber import Chain, ChainParseError, SUPPORTED_CDR_DEFINITIONS, SUPPORTED_SCHEMES
 from Bio import SeqIO
@@ -235,7 +236,28 @@ def sapiens_fasta_only(inputs, output_fasta, humanization_params, limit=None):
         click.echo('Done.', err=True)
 
 
-def sapiens_generate_only(inputs, output_fasta, humanization_params, limit=None, initial_n_samples=1000) -> None:
+def sapiens_generate_only(
+    inputs: List[str],
+    output_fasta: str,
+    humanization_params: HumanizationParams,
+    limit: Optional[int]=None,
+    initial_n_samples: int=1000
+) -> None:
+    """Generates initial_n_samples sequences using the output of the sapiens model.
+    
+    The model outputs a probability matrix where for each residue of the input sequence
+    we are given the probabilities of an amino acid being in that position.
+    We use this matrix as a sampling distribution to generate new sequences. We try to generate
+    initial_n_samples sequences, and drop any duplicates that are generated.
+
+    Args:
+        inputs: List of fasta files with sequences to humanize.
+        output_fasta: Fasta file to write the generated sequences to.
+        humanization_params: The params used to humanize the input sequences.
+        limit: Number of input sequences to process from inputs. Defaults to None.
+        initial_n_samples: target number of samples to generate. Defaults to 1000.
+
+    """
     if output_fasta:
         output_dir = Path(output_fasta)
         output_dir.mkdir(parents=True, exist_ok=True)
