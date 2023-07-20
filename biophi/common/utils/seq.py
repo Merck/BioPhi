@@ -1,12 +1,11 @@
 import urllib
-from Bio.Align import substitution_matrices
 from Bio.Seq import Seq
 from Bio.SeqRecord import SeqRecord
 import itertools
 import subprocess
 import numpy as np
 from io import StringIO
-from typing import List, Tuple
+from typing import List
 from Bio import SeqIO
 from abnumber import Chain
 import re

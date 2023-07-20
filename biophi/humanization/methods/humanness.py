@@ -1,8 +1,7 @@
 import os
 from dataclasses import dataclass
-from functools import cached_property, lru_cache
+from functools import cached_property
 from Bio.SeqRecord import SeqRecord
-from Bio.SeqUtils.ProtParam import ProteinAnalysis
 from abnumber.chain import Chain, Position
 import pandas as pd
 from abnumber.germlines import get_imgt_v_chains, get_imgt_j_chains

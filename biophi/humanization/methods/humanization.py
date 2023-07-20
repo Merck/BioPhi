@@ -1,10 +1,8 @@
 from functools import cached_property
 from typing import Dict, List, Optional
 import pandas as pd
-import requests
 from dataclasses import dataclass
 from abnumber.chain import Chain, Alignment, Position
-from flask import current_app
 
 from biophi.common.utils.formatting import get_valid_filename
 import sapiens

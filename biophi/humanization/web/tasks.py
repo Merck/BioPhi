@@ -10,7 +10,7 @@ from biophi.humanization.methods.humanization import HumanizationParams, \
     AntibodyHumanization, humanize_antibody
 from biophi.humanization.methods.humanness import OASisParams, \
     AntibodyHumanness, get_antibody_humanness, ChainHumanness, get_chain_humanness
-from abnumber import Chain, Position
+from abnumber import Chain
 import pandas as pd
 
 
