@@ -2,7 +2,7 @@ from typing import List
 
 from abnumber.germlines import get_germline_v_families, get_germline_v_genes
 
-from biophi.common.utils.io import (send_excel, send_fasta, send_text, read_antibody_input_request)
+from biophi.common.utils.io import (correct_backmutate_vernier_cdr_definition, send_excel, send_fasta, send_text, read_antibody_input_request)
 from biophi.common.utils.scheduler import scheduler
 from biophi.humanization.methods.humanization import SapiensHumanizationParams, \
     CDRGraftingHumanizationParams, ManualHumanizationParams
@@ -102,12 +102,9 @@ def humanize_post():
 
     scheme = request.form['scheme']
     humanizing_cdr_definition = request.form['cdr_definition']
-    if humanizing_cdr_definition == 'kabat_vernier':
-        cdr_definition = 'kabat'
-        backmutate_vernier = True
-    else:
-        cdr_definition = humanizing_cdr_definition
-        backmutate_vernier = False
+    backmutate_vernier, cdr_definition = correct_backmutate_vernier_cdr_definition(
+        cdr_definition=humanizing_cdr_definition
+    )
 
     method = request.form.get('method', 'manual')
     if method == 'manual':

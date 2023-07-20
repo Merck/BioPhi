@@ -1,7 +1,7 @@
 import sys
 import time
 from io import StringIO, BytesIO
-from typing import Dict, Optional, List, Union
+from typing import Dict, Optional, List, Tuple, Union
 from Bio import SeqIO
 from Bio.PDB import PDBParser
 from Bio.PDB.Chain import Chain as BioPdbChain
@@ -178,7 +178,7 @@ def convert_pdb_positions(pdb_chain: BioPdbChain, ab_chain: AbNumberChain) -> Di
     return positions
 
 
-def clean_extension(filename):
+def clean_extension(filename: str) -> str:
     """Return clean file extension
 
     - lowercase
@@ -198,7 +198,7 @@ def clean_extension(filename):
     return extension[1:]
 
 
-def clean_antibody_name(name):
+def clean_antibody_name(name: str) -> str:
     """Get clean antibody name from FASTA identifier
 
     - Remove chain type suffix such as "_VH" or "_VL"
@@ -207,6 +207,29 @@ def clean_antibody_name(name):
         if name.endswith(suffix):
             name = name[:-len(suffix)]
     return name
+
+
+def correct_backmutate_vernier_cdr_definition(cdr_definition: str) -> Tuple[bool, str]:
+    """Corrects backmutate_vernier and cdr_definition for the input CDR definition.
+
+    For the kabat_vernier CDR definition, the backmutate_vernier is set to True
+    and cdr_definition is set to kabat. For all other CDR definitions, the
+    backmutate_vernier is set to False and cdr_definition is set to the input.
+
+    Args:
+        cdr_definition: input CDR definitions
+
+    Returns:
+        Corrected backmutate_vernier, cdr_definition
+    """
+    if cdr_definition == 'kabat_vernier':
+        backmutate_vernier = True
+        corrected_cdr_definition = 'kabat'
+    else:
+        backmutate_vernier = False
+        corrected_cdr_definition = cdr_definition
+    
+    return backmutate_vernier, corrected_cdr_definition
 
 
 def pair_antibody_records(records, verbose=False) -> (List[AntibodyInput], List[str], List[str]):
@@ -363,7 +386,7 @@ def chunk_list(lst, n) -> List[List]:
             yield batch
 
 
-def send_text(text, name, extension='txt', timestamp=True):
+def send_text(text: str, name: str, extension: str='txt', timestamp: bool=True):
     bytesio = BytesIO()
     bytesio.write(text.encode())
     bytesio.seek(0)

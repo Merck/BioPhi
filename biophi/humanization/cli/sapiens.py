@@ -5,9 +5,15 @@ import click
 from Bio import SeqIO
 import pandas as pd
 from biophi.common.utils.formatting import logo
-from biophi.common.utils.io import parse_antibody_files, write_sheets
+from biophi.common.utils.io import correct_backmutate_vernier_cdr_definition, parse_antibody_files, write_sheets
 from biophi.common.utils.seq import iterate_fasta
 from biophi.humanization.cli.oasis import show_unpaired_warning
+from biophi.humanization.methods.humanization import (
+    CDRGraftingHumanizationParams,
+    humanize_chain,
+    SapiensHumanizationParams,
+    HumanizationParams
+)
 from biophi.humanization.methods.humanness import OASisParams
 from biophi.humanization.methods.humanization import humanize_chain, SapiensHumanizationParams, HumanizationParams
 from abnumber import Chain, ChainParseError, SUPPORTED_CDR_DEFINITIONS, SUPPORTED_SCHEMES
@@ -15,6 +21,17 @@ import os
 import sys
 from tqdm import tqdm
 from biophi.humanization.web.tasks import humanize_antibody_task, HumanizeAntibodyTaskResult
+from biophi.humanization.web.views import _get_germline_lists
+
+
+def validate_min_subjects(ctx, param, min_subjects):
+    if not isinstance(min_subjects, float):
+        raise click.BadParameter(f"{min_subjects=}. Must be a float. Received {type(min_subjects)}")
+
+    if not 0 < min_subjects <= 1.0:
+        raise click.BadParameter(f"{min_subjects=}. Must be a float between 0 and 1.")
+
+    return min_subjects
 
 
 @click.command()
@@ -25,12 +42,17 @@ from biophi.humanization.web.tasks import humanize_antibody_task, HumanizeAntibo
 @click.option('--mean-score-only', is_flag=True, default=False, type=bool, help='Output only a CSV file with one Sapiens score per sequence')
 @click.option('--oasis-db', required=False, help='OAS peptide database connection string (required to run OASis)')
 @click.option('--version', default='latest', help='Sapiens trained model name')
+@click.option('--method', required=False, default='sapiens', show_default=True, type=click.Choice(['sapiens', 'cdr_grafting'], case_sensitive=False), help='Method of humanization')
+@click.option('--sapiens_final_pass', required=False, default=False, type=bool, help='Perform final humanization pass using Sapiens')
+@click.option('--heavy_v_germline', required=False, default="auto", type=str, help='Germline light V gene to use as template for humanization. Use Auto to pick nearest germline based on sequence homology.')
+@click.option('--light_v_germline', required=False, default="auto", type=str, help='Germline heavy V gene to use as template for humanization. Use Auto to pick nearest germline based on sequence homology.')
+@click.option('--min_subjects', default=0.1, type=float, callback=validate_min_subjects, help='OASis prevalence threshold')
 @click.option('--iterations', type=int, default=1, help='Run Sapiens given number of times to discover more humanizing mutations')
 @click.option('--scheme', default=HumanizationParams.cdr_definition, help=f'Numbering scheme: one of {", ".join(SUPPORTED_SCHEMES)}')
 @click.option('--cdr-definition', default=HumanizationParams.cdr_definition, help=f'CDR definition: one of {", ".join(SUPPORTED_CDR_DEFINITIONS)}')
 @click.option('--humanize-cdrs', is_flag=True, default=False, type=bool, help='Allow humanizing mutations in CDRs')
 @click.option('--limit', required=False, metavar='N', type=int, help='Process only first N records')
-def sapiens(inputs, output, fasta_only, scores_only, mean_score_only, version, iterations, scheme, cdr_definition, humanize_cdrs, limit, oasis_db):
+def sapiens(inputs, output, fasta_only, scores_only, mean_score_only, version, method, sapiens_final_pass, heavy_v_germline, light_v_germline, min_subjects, iterations, scheme, cdr_definition, humanize_cdrs, limit, oasis_db):
     """Sapiens: Antibody humanization using deep learning.
 
      Sapiens is trained on 20 million natural antibody sequences
@@ -80,48 +102,87 @@ def sapiens(inputs, output, fasta_only, scores_only, mean_score_only, version, i
         click.echo(f'- Humanizing using {iterations} {"iteration" if iterations == 1 else "iterations"}', err=True)
     click.echo(err=True)
 
-    humanization_params = SapiensHumanizationParams(
-        model_version=version,
-        humanize_cdrs=humanize_cdrs,
-        scheme=scheme,
-        cdr_definition=cdr_definition,
-        iterations=iterations
+    backmutate_vernier, corrected_cdr_definition = correct_backmutate_vernier_cdr_definition(
+        cdr_definition=cdr_definition
     )
-    oasis_params = OASisParams(
-        oasis_db_path=oasis_db,
-        min_fraction_subjects=0.10
-    ) if oasis_db else None
 
-    if inputs:
-        if scores_only or mean_score_only:
-            return sapiens_scores_only(
-                inputs,
-                output,
-                limit=limit,
-                humanization_params=humanization_params,
-                mean=mean_score_only
-            )
-        elif fasta_only:
-            return sapiens_fasta_only(
-                inputs,
-                output,
-                limit=limit,
-                humanization_params=humanization_params
-            )
-        else:
-            from biophi.common.web.views import app
-            with app.app_context():
-                return sapiens_full(
+    if method == "cdr_grafting":
+        valid_heavy_germlines, valid_light_germlines = _get_germline_lists()
+        for valid_lines in [valid_heavy_germlines, valid_light_germlines]:
+            valid_lines = valid_lines.append('auto')
+        if heavy_v_germline not in valid_heavy_germlines:
+            raise ValueError(f'Invalid heavy V germline: {heavy_v_germline}. Valid options: {", ".join(valid_heavy_germlines)}')
+
+        if light_v_germline not in valid_light_germlines:
+            raise ValueError(f'Invalid light V germline: {light_v_germline}. Valid options: {", ".join(valid_light_germlines)}')
+
+
+        humanization_params = CDRGraftingHumanizationParams(
+            scheme=scheme,
+            cdr_definition=corrected_cdr_definition,
+            backmutate_vernier=backmutate_vernier,
+            heavy_v_germline=heavy_v_germline,
+            light_v_germline=light_v_germline,
+            sapiens_iterations=(1 if sapiens_final_pass else 0)
+        )
+
+        oasis_params = OASisParams(
+            oasis_db_path=oasis_db,
+            min_fraction_subjects=min_subjects
+        ) if oasis_db else None
+
+        sapiens_full(
+            inputs=inputs,
+            output_dir=output,
+            humanization_params=humanization_params,
+            oasis_params=oasis_params,
+            limit=limit
+        )
+
+    else:
+        humanization_params = SapiensHumanizationParams(
+            model_version=version,
+            humanize_cdrs=humanize_cdrs,
+            backmutate_vernier=backmutate_vernier,
+            scheme=scheme,
+            cdr_definition=corrected_cdr_definition,
+            iterations=iterations
+        )
+        oasis_params = OASisParams(
+            oasis_db_path=oasis_db,
+            min_fraction_subjects=0.10
+        ) if oasis_db else None
+
+        if inputs:
+            if scores_only or mean_score_only:
+                return sapiens_scores_only(
                     inputs,
                     output,
                     limit=limit,
                     humanization_params=humanization_params,
-                    oasis_params=oasis_params
+                    mean=mean_score_only
                 )
-    else:
-        if output:
-            click.echo('Warning! Ignoring --output and --report parameter in interactive session (no inputs provided)', err=True)
-        return sapiens_interactive(scheme=scheme, humanization_params=humanization_params)
+            elif fasta_only:
+                return sapiens_fasta_only(
+                    inputs,
+                    output,
+                    limit=limit,
+                    humanization_params=humanization_params
+                )
+            else:
+                from biophi.common.web.views import app
+                with app.app_context():
+                    return sapiens_full(
+                        inputs,
+                        output,
+                        limit=limit,
+                        humanization_params=humanization_params,
+                        oasis_params=oasis_params
+                    )
+        else:
+            if output:
+                click.echo('Warning! Ignoring --output and --report parameter in interactive session (no inputs provided)', err=True)
+            return sapiens_interactive(scheme=scheme, humanization_params=humanization_params)
 
 
 def sapiens_interactive(scheme, humanization_params):
@@ -279,4 +340,3 @@ def sapiens_full(inputs, output_dir, humanization_params, oasis_params, limit=No
         if os.path.exists(output_dir) and os.path.isdir(output_dir) and not len(os.listdir(output_dir)):
             os.rmdir(output_dir)
         raise
-
