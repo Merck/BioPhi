@@ -80,7 +80,7 @@ class ChainHumanness:
         if frequency:
             curve = curve / curve.sum()
         else:
-            curve = curve.astype(np.int)
+            curve = curve.astype(int)
 
         if cumulative:
             curve = curve[::-1].cumsum()[::-1]
