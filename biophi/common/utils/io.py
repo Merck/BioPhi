@@ -232,7 +232,7 @@ def correct_backmutate_vernier_cdr_definition(cdr_definition: str) -> Tuple[bool
     return backmutate_vernier, corrected_cdr_definition
 
 
-def pair_antibody_records(records, verbose=False) -> (List[AntibodyInput], List[str], List[str]):
+def pair_antibody_records(records, verbose=False) -> Tuple[List[AntibodyInput], List[str], List[str]]:
     invalid_names = []
     duplicate_names = []
 
@@ -292,7 +292,7 @@ def parse_antibody_pdb_ids(pdb_ids):
 def parse_antibody_inputs(seq_string: str,
                           files: List[Union[str, FileStorage]] = None,
                           pdb_ids: List[str] = None
-                          ) -> (List[AntibodyInput], List[str], List[str], List[str]):
+                          ) -> Tuple[List[AntibodyInput], List[str], List[str], List[str]]:
     files = files or []
     pdb_ids = pdb_ids or []
 
@@ -327,7 +327,7 @@ def read_file_contents(file: Union[str, FileStorage]):
     return contents, filename
 
 
-def parse_antibody_files(files: List[Union[str, FileStorage]], verbose=False) -> (List[AntibodyInput], List[str], List[str], List[str]):
+def parse_antibody_files(files: List[Union[str, FileStorage]], verbose=False) -> Tuple[List[AntibodyInput], List[str], List[str], List[str]]:
     names = set()
     pdb_antibody_inputs = []
     pdb_invalid_names = []
