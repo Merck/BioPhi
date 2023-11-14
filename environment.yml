@@ -12,7 +12,8 @@ dependencies:
     - click >= 7
     - pandas
     - sqlalchemy < 2
-    - flask
+    - flask < 3.0.0
+    - werkzeug < 3.0.0
     - redis
     - celery
     - biopython
