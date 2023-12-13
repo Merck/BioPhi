@@ -20,16 +20,16 @@
 BioPhi is an open-source antibody design platform. 
 It features methods for automated antibody humanization (Sapiens), humanness evaluation (OASis) and an interface for computer-assisted antibody sequence design.
 
-BioPhi is available at: [http://biophi.dichlab.org](http://biophi.dichlab.org)
-
 Learn more in the BioPhi, Sapiens and OASis in our publication:
 
 > David Prihoda, Jad Maamary, Andrew Waight, Veronica Juan, Laurence Fayadat-Dilman, Daniel Svozil & Danny A. Bitton (2022) 
 > BioPhi: A platform for antibody design, humanization, and humanness evaluation based on natural antibody repertoires and deep learning, mAbs, 14:1, DOI: https://doi.org/10.1080/19420862.2021.2020203
 
+The university-hosted BioPhi web server is available at: [http://biophi.dichlab.org](http://biophi.dichlab.org)
+
 For more information about the Sapiens antibody language model, see the [Sapiens repository](https://github.com/Merck/Sapiens)
 
-The data and notebooks supporting the analysis are found in: https://github.com/Merck/BioPhi-2021-publication
+The data and notebooks supporting the analysis are found in the [BioPhi-2021-publication repository](https://github.com/Merck/BioPhi-2021-publication)
 
 ## Intro video
 
