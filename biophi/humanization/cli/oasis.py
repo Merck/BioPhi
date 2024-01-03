@@ -27,7 +27,7 @@ def oasis(inputs, output, oasis_db, scheme, cdr_definition, min_percent_subjects
         \b
         # Evaluate humanness from FASTA file(s), save OASis humanness report to directory
         biophi oasis input.fa --output ./report.xlsx \\
-          --oasis-db sqlite:////Absolute/path/to/oas_human_subject_9mers_2019_11.db
+          --oasis-db path/to/OASis9mers.db
 
     INPUTS: Input FASTA file path(s)
     """
