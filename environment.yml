@@ -10,7 +10,7 @@ dependencies:
   - hmmer >= 3.1
   - pip:
     - click >= 7
-    - pandas
+    - pandas < 2.2
     - sqlalchemy < 2
     - flask < 3.0.0
     - werkzeug < 3.0.0
