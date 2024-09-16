@@ -1,0 +1,29 @@
+name: Bioconda install
+
+on:
+  schedule:
+  - cron:  '0 3 * * 1'
+
+
+jobs:
+  install-linux:
+    runs-on: ubuntu-latest
+    strategy:
+      max-parallel: 5
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.9
+    - name: Add conda to system path
+      run: |
+        # $CONDA is an environment variable pointing to the root of the miniconda directory
+        echo $CONDA/bin >> $GITHUB_PATH
+    - name: Install dependencies
+      run: |
+        conda install -c bioconda biophi
+    - name: Run tests
+      run: |
+        biophi sapiens -h
+        biophi oasis -h
