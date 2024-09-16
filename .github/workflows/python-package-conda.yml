@@ -27,5 +27,5 @@ jobs:
         make env
     - name: Test with pytest
       run: |
-        conda install pytest
+        pip install pytest
         make pytest
