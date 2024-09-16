@@ -27,3 +27,5 @@ jobs:
       run: |
         biophi sapiens -h
         biophi oasis -h
+        pip install pytest
+        make pytest
