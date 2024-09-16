@@ -4,7 +4,7 @@ channels:
   - conda-forge
 dependencies:
   - python = 3.9
-  - pip
+  - pip<24.1 # due to error in omegaconf (dependency of fairseq)
   - abnumber == 0.3.2
   - anarci == 2020.04.23
   - hmmer >= 3.1
