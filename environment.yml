@@ -22,4 +22,4 @@ dependencies:
     - tqdm
     - xlsxwriter
     - humanize
-    - sapiens >= 1.0.4
+    - sapiens >= 1.0.5
