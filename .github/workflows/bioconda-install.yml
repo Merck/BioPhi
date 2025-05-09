@@ -22,7 +22,7 @@ jobs:
         echo $CONDA/bin >> $GITHUB_PATH
     - name: Install dependencies
       run: |
-        conda install -c bioconda biophi
+        conda install -c conda-forge -c bioconda biophi
     - name: Run tests
       run: |
         biophi sapiens -h
