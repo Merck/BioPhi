@@ -61,6 +61,9 @@ wget https://zenodo.org/record/5164685/files/OASis_9mers_v1.db.gz
 gunzip OASis_9mers_v1.db.gz
 ```
 
+> [!NOTE]
+> If you are only interested in computing OASis identity using antibody peptides found in >10% of human subjects, you can use our new pip-installable library `promb`: https://github.com/MSDLLCpapers/promb
+
 ### 2. Install BioPhi using Conda
 
 You can install BioPhi using [Conda](https://docs.conda.io/projects/conda/en/latest/user-guide/install/download.html) 
