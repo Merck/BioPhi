@@ -6,7 +6,7 @@ import time
 
 @click.command()
 @click.option('--host', default='localhost', help='Server port')
-@click.option('--port', type=int, default=5000, help='Server port')
+@click.option('--port', type=int, default=5001, help='Server port')
 def web(host, port):
     """Run the BioPhi web interface in simplified mode (without a processing queue)"""
     logo()

@@ -246,10 +246,12 @@ def sapiens_humanize_chain(parental_chain: Chain, params: SapiensHumanizationPar
     )
 
 
-def sapiens_predict_chain(chain, model_version='latest', return_all_hiddens=False):
+def sapiens_predict_chain(chain, model_version='latest', return_embeddings=False):
+    # model_version is unused but kept for backwards compatibility
+    assert model_version == "latest"
+
     return sapiens.predict_scores(
         seq=chain.seq,
         chain_type=chain.chain_type,
-        model_version=model_version,
-        return_all_hiddens=return_all_hiddens
+        return_embeddings=return_embeddings
     )
